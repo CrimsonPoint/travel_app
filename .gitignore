@@ -17,3 +17,7 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/travel_app/node_modules
+/travel_app/dist
+/travel_app/dist-ssr
+/travel_app/*.local
