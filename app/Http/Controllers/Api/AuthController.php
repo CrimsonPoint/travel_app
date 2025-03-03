@@ -21,8 +21,10 @@ class AuthController extends Controller
             ]);
         }
 
+        /** @var User $user */
+
         $user = Auth::user();
-        $user_access_token = $user->createToken('token')->accessToken;
+        $user_access_token = $user->createToken('token')->plainTextToken;
 
         return response()->json([
             "user" => $user,
@@ -43,12 +45,13 @@ class AuthController extends Controller
 
         $data = $request->validated();
         $user = User::create([
-            "name" => $data["name"] . " " . $data["lastname"],
+            "name" => $data["name"],
             "email" => $data["email"],
             "password" => bcrypt($data["password"]),
         ]);
 
-        $user_access_token = $user->createToken("token")->accessToken;
+        /** @var User $user */
+        $user_access_token = $user->createToken("token")->plainTextToken;
 
         return response([
             "user" => $user,

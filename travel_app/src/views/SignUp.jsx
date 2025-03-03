@@ -1,29 +1,22 @@
 import {Link} from "react-router-dom";
-import {useRef} from "react";
+import {useRef, useState} from "react";
 import axiosClient from "../axios-client.js";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
 
 export default function SignUp() {
   const nameRef = useRef();
-  const lastNameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
+  const [errors, setErrors] = useState(null);
 
   const {setUser, setToken} = useStateContext();
-
-  function isValidPassword() {
-    /*
-    * TODO Написать сверку паролей при вводе
-    * */
-  }
 
   const onSubmit = (ev) => {
     ev.preventDefault();
 
     const data = {
       name: nameRef.current.value,
-      lastName: lastNameRef.current.value,
       email: emailRef.current.value,
       password: passwordRef.current.value,
       password_confirmation: confirmPasswordRef.current.value,
@@ -31,14 +24,15 @@ export default function SignUp() {
 
     axiosClient.post("/signup", data)
       .then(({data}) => {
-        setToken(data.token);
+        setErrors(null)
         setUser(data.user);
+        setToken(data.token);
       })
       .catch(err => {
-        const error = err.response;
-
-        if(error.response && error.response.status === 403) {
-          console.log(error.data.response);
+        /* TODO Сделать корректную обработку ошибок, подкрутить UI */
+        const response = err.response;
+        if (response && response.status === 422) {
+          setErrors(response.data.errors)
         }
       });
   }
@@ -50,8 +44,14 @@ export default function SignUp() {
           <h1 className="title">
             Зарегистрируйте свой аккаунт
           </h1>
+          {
+            errors && <div className="alert alert-danger">
+              {Object.keys(errors).map(key => (
+                <p key={key}>{errors[key][0]}</p>
+              ))}
+            </div>
+          }
           <input ref={nameRef} placeholder="Имя" type="Text"/>
-          <input ref={lastNameRef} placeholder="Фамилия" type="Text"/>
           <input ref={emailRef} placeholder="Почта" type="email"/>
           <input ref={passwordRef} placeholder="Пароль" type="password"/>
           <input ref={confirmPasswordRef} placeholder="Повторите пароль" type="password"/>
