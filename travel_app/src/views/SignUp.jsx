@@ -2,6 +2,22 @@ import {Link} from "react-router-dom";
 import {useRef, useState} from "react";
 import axiosClient from "../axios-client.js";
 import {useStateContext} from "../contexts/ContextProvider.jsx";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import {useForm} from "react-hook-form";
 
 export default function SignUp() {
   const nameRef = useRef();
@@ -9,58 +25,158 @@ export default function SignUp() {
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
   const [errors, setErrors] = useState(null);
-
   const {setUser, setToken} = useStateContext();
 
-  const onSubmit = (ev) => {
-    ev.preventDefault();
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
+  const onSubmit = (values) => {
     const data = {
-      name: nameRef.current.value,
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-      password_confirmation: confirmPasswordRef.current.value,
-    }
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      password_confirmation: values.password_confirmation,
+    };
 
-    axiosClient.post("/signup", data)
+    axiosClient
+      .post("/signup", data)
       .then(({data}) => {
-        setErrors(null)
+        setErrors(null);
         setUser(data.user);
         setToken(data.token);
       })
-      .catch(err => {
-        /* TODO Сделать корректную обработку ошибок, подкрутить UI */
+      .catch((err) => {
         const response = err.response;
         if (response && response.status === 422) {
-          setErrors(response.data.errors)
+          setErrors(response.data.errors);
         }
       });
-  }
+  };
 
   return (
-    <div className="login-signup-form animated fadeInDown">
-      <div className="form">
-        <form onSubmit={onSubmit}>
-          <h1 className="title">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h1 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Зарегистрируйте свой аккаунт
           </h1>
-          {
-            errors && <div className="alert alert-danger">
-              {Object.keys(errors).map(key => (
+        </div>
+
+        {errors && (
+          <Alert variant="destructive">
+            <AlertTitle>Ошибка</AlertTitle>
+            <AlertDescription>
+              {Object.keys(errors).map((key) => (
                 <p key={key}>{errors[key][0]}</p>
               ))}
-            </div>
-          }
-          <input ref={nameRef} placeholder="Имя" type="Text"/>
-          <input ref={emailRef} placeholder="Почта" type="email"/>
-          <input ref={passwordRef} placeholder="Пароль" type="password"/>
-          <input ref={confirmPasswordRef} placeholder="Повторите пароль" type="password"/>
-          <button className="btn btn-block">Зарегистрироваться</button>
-          <p className="message">
-            Вы уже зарегистрированы, <Link to="/login">войти?</Link>
-          </p>
-        </form>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Имя</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Имя"
+                      required
+                      ref={nameRef}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Почта</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Почта"
+                      required
+                      ref={emailRef}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Пароль</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Пароль"
+                      required
+                      ref={passwordRef}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password_confirmation"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Повторите пароль</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Повторите пароль"
+                      required
+                      ref={confirmPasswordRef}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage/>
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full">
+              Зарегистрироваться
+            </Button>
+
+            <p className="text-center text-sm text-gray-600">
+              Вы уже зарегистрированы,{" "}
+              <Link
+                to="/login"
+                className="text-indigo-600 hover:text-indigo-500"
+              >
+                войти?
+              </Link>
+            </p>
+          </form>
+        </Form>
       </div>
     </div>
-  )
+  );
 }
