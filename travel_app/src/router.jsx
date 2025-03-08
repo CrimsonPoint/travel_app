@@ -6,6 +6,7 @@ import NotFoundPage from "./views/NotFoundPage.jsx";
 import DefaultLayout from "./components/DefaultLayout.jsx";
 import GuestLayout from "./components/GuestLayout.jsx";
 import Dashboard from "./views/Dashboard.jsx";
+import Home from "./views/Home.jsx";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <Dashboard/>
+      },
+      {
+        path: "/home",
+        element: <Home/>,
       },
     ]
   },

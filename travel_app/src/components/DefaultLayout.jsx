@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from "@/components/ui/tooltip"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Menu, Users, LayoutDashboard } from "lucide-react";
+import { Menu, Users, LayoutDashboard, House } from "lucide-react";
 
 export default function DefaultLayout() {
   const { user, token, setUser, setToken } = useStateContext();
@@ -43,6 +43,54 @@ export default function DefaultLayout() {
     return <Navigate to="/login" />;
   }
 
+  /**
+   * TODO Перенести получение на бек
+   * */
+  let pages = [
+    {
+      link : "home",
+      title : "Home",
+      icon : <House className="h-5 w-5" />,
+      access : true
+    },
+    {
+      link : "dashboard",
+      title : "Dashboard",
+      icon : <LayoutDashboard className="h-5 w-5" />,
+      access : true
+    },
+    {
+      link : "users",
+      title : "Users",
+      icon : <Users className="h-5 w-5" />,
+      access : true
+    }
+];
+  let pageList = pages.map((page) => {
+    if (!page.access) return;
+    return (
+      <Link
+        to={`/${page.link}`}
+        className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              {page.icon}
+            </TooltipTrigger>
+            <TooltipContent className={`${isSidebarOpen ? "hidden" : ""}`} side="right">
+              <p>{page.title}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <span className={`${isSidebarOpen ? "ml-2" : "hidden"}`}>
+        {page.title}
+      </span>
+      </Link>
+    );
+  });
+
+
   return (
     <div className="min-h-screen flex bg-gray-100">
       <aside
@@ -60,42 +108,7 @@ export default function DefaultLayout() {
         </div>
         <ScrollArea className="h-[calc(100vh-64px)] flex">
           <nav className="space-y-2 p-2">
-            <Link
-              to="/dashboard"
-              className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <LayoutDashboard className="h-5 w-5" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>Dashboard</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className={`${isSidebarOpen ? "ml-2" : "hidden"}`}>
-                Dashboard
-              </span>
-            </Link>
-            <Link
-              to="/users"
-              className="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Users className="h-5 w-5" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p>Users</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <span className={`${isSidebarOpen ? "ml-2" : "hidden"}`}>
-                Users
-              </span>
-            </Link>
+            {pageList}
           </nav>
         </ScrollArea>
       </aside>
