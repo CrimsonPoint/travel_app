@@ -49,19 +49,19 @@ export default function DefaultLayout() {
   let pages = [
     {
       link : "home",
-      title : "Home",
+      title : "Главная",
       icon : <House className="h-5 w-5" />,
       access : true
     },
     {
       link : "dashboard",
-      title : "Dashboard",
+      title : "Панель управления",
       icon : <LayoutDashboard className="h-5 w-5" />,
       access : true
     },
     {
       link : "users",
-      title : "Users",
+      title : "Пользователи",
       icon : <Users className="h-5 w-5" />,
       access : true
     }
@@ -83,7 +83,7 @@ export default function DefaultLayout() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <span className={`${isSidebarOpen ? "ml-2" : "hidden"}`}>
+        <span className={`${isSidebarOpen ? "ml-2" : "hidden"} text-nowrap`}>
         {page.title}
       </span>
       </Link>
