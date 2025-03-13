@@ -42,4 +42,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function participatingTours()
+    {
+        return $this->belongsToMany(Tour::class, 'tour_user', 'user_id', 'tour_id')
+            ->withTimestamps();
+    }
 }
