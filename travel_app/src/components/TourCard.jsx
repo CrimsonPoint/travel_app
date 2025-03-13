@@ -3,6 +3,7 @@ import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Badge} from "@/components/ui/badge";
 import {Users} from "lucide-react";
+import {useState} from "react";
 
 export default function TourCard({
   title = "Без названия",
@@ -12,9 +13,42 @@ export default function TourCard({
   difficulty = "Средняя",
   distance = "0 км",
   participants = 0,
+  maxParticipants = 0,
   onSignUp = () => {
   }
 }) {
+  const [isSignedUp, setIsSignedUp] = useState(false);
+
+  const handleSignUp = () => {
+    setIsSignedUp(true);
+    onSignUp();
+  };
+
+  let difficulties = [
+    {
+      id: 1,
+      name: "Легкая",
+      colorClass: 'bg-green-500',
+    },
+    {
+      id: 2,
+      name: "Средняя",
+      colorClass: 'bg-yellow-500',
+    },
+    {
+      id: 3,
+      name: "Тяжелая",
+      colorClass: 'bg-red-500',
+    },
+  ]
+  const getDifficulty = (lvl) => {
+    difficulties.map((difficulty) => {
+      if (difficulty.id === lvl) {
+
+      }
+    })
+  }
+
   return (
     <Card className="w-full max-w-sm overflow-hidden">
       {imageUrl ? (
@@ -54,13 +88,17 @@ export default function TourCard({
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <Users className="h-4 w-4"/>
-          <span>{participants} участников</span>
+          <span>{participants} / {maxParticipants}  участников</span>
         </div>
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full" onClick={onSignUp}>
-          Записаться
+        <Button
+          className="w-full cursor-pointer"
+          onClick={handleSignUp}
+          disabled={isSignedUp}
+        >
+          {isSignedUp ? "Вы записаны" : "Записаться"}
         </Button>
       </CardFooter>
     </Card>

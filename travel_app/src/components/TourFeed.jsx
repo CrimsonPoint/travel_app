@@ -1,4 +1,5 @@
 import TourCard from "./TourCard";
+import {useState} from "react";
 
 export default function TourFeed() {
 
@@ -9,9 +10,10 @@ export default function TourFeed() {
       imageUrl: null,
       creatorName: "Иван Петров",
       creatorAvatar: null,
-      difficulty: "Сложная",
+      difficulty: "Высокая",
       distance: "25 км",
       participants: 12,
+      maxParticipants: 15,
     },
     {
       id: 2,
@@ -22,6 +24,7 @@ export default function TourFeed() {
       difficulty: "Легкая",
       distance: "5 км",
       participants: 8,
+      maxParticipants: 10,
     },
     {
       id: 3,
@@ -32,6 +35,29 @@ export default function TourFeed() {
       difficulty: "Средняя",
       distance: "40 км",
       participants: 15,
+      maxParticipants: 20,
+    },
+    {
+      id: 4,
+      title: "Хребет Урала",
+      imageUrl: null,
+      creatorName: "Ваня Петров",
+      creatorAvatar: null,
+      difficulty: "Высокая",
+      distance: "65 км",
+      participants: 1,
+      maxParticipants: 5,
+    },
+    {
+      id: 5,
+      title: "Змеиные пики",
+      imageUrl: null,
+      creatorName: "Андрей Воронов",
+      creatorAvatar: null,
+      difficulty: "Высокая",
+      distance: "120 км",
+      participants: 1,
+      maxParticipants: 3,
     },
   ];
 
@@ -43,7 +69,7 @@ export default function TourFeed() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {tours.map((tour) => (
           <TourCard
             key={tour.id}
@@ -55,6 +81,7 @@ export default function TourFeed() {
             distance={tour.distance}
             participants={tour.participants}
             onSignUp={() => handleSignUp(tour.id)}
+            maxParticipants={tour.maxParticipants}
           />
         ))}
       </div>

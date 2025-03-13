@@ -7,6 +7,7 @@ import DefaultLayout from "./components/DefaultLayout.jsx";
 import GuestLayout from "./components/GuestLayout.jsx";
 import Dashboard from "./views/Dashboard.jsx";
 import Home from "./views/Home.jsx";
+import TourDetailPage from "./views/TourDetailPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Navigate to="/users"/>,
+        element: <Navigate to="/home"/>,
       },
       {
         path: "/users",
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "/home",
         element: <Home/>,
+      },
+      {
+        path: "/tour",
+        element: <TourDetailPage/>,
       },
     ]
   },
