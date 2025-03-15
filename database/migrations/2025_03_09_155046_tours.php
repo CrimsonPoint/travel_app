@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('creator_id');
             $table->string('difficulty')->default(1);
             $table->string('distance')->default('0 км');
-            $table->integer('participants')->default(0);
+            $table->integer('participants')->default(1);
+            $table->integer('max_participants')->default(2);
             $table->text('description')->nullable();
             $table->dateTime('date_start')->nullable(false);
             $table->dateTime('date_end')->nullable(false);

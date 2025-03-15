@@ -15,9 +15,10 @@ export default function TourCard({
   participants = 0,
   maxParticipants = 0,
   onSignUp = () => {
-  }
+  },
+  isParticipants = false,
 }) {
-  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isSignedUp, setIsSignedUp] = useState(isParticipants);
 
   const handleSignUp = () => {
     setIsSignedUp(true);

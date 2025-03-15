@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -47,5 +48,22 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Tour::class, 'tour_user', 'user_id', 'tour_id')
             ->withTimestamps();
+    }
+
+    public function isAdmin() {
+        $lvl = DB::table('roles')->where('name', '=', 'admin')->first()->lvl;
+        return $this->getPermissionLvl() == $lvl;
+    }
+
+    public function getPermissionLvl()
+    {
+        $userId = $this->id;
+        $userRoleLvl = DB::table('role_user')
+            ->join('roles', 'role_user.role_id', '=', 'roles.id')
+            ->where('role_user.user_id', $userId)
+            ->select('roles.lvl')
+            ->first();
+
+        return $userRoleLvl->lvl;
     }
 }
