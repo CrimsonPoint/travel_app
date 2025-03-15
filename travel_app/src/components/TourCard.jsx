@@ -4,8 +4,10 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Badge} from "@/components/ui/badge";
 import {Users} from "lucide-react";
 import {useState} from "react";
+import { Link } from "react-router-dom";
 
 export default function TourCard({
+  id,
   title = "Без названия",
   imageUrl = null,
   creatorName = "Неизвестный",
@@ -68,7 +70,9 @@ export default function TourCard({
 
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold">
+            <Link to={`/tour/${id}`}>{title}</Link>
+          </CardTitle>
           <Avatar className="h-8 w-8">
             {creatorAvatar ? (
               <AvatarImage src={creatorAvatar} alt={creatorName}/>

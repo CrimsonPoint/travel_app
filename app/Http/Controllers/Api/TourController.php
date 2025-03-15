@@ -35,6 +35,11 @@ class TourController extends Controller
         return $result;
     }
 
+    public function getTour(Request $request, $id)
+    {
+        return Tour::findOrFail($id);
+    }
+
     public function create(request $request)
     {
         $validated = $request->validate([

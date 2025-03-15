@@ -31,6 +31,7 @@ export default function TourFeed() {
         {tours.map((data) => (
           <TourCard
             key={data.tour.id}
+            id={data.tour.id}
             title={data.tour.title}
             imageUrl={data.tour.imageUrl}
             creatorName={data.tour.creatorName}
