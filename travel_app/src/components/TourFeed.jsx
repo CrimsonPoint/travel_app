@@ -17,9 +17,12 @@ export default function TourFeed() {
   }, []);
 
   const handleSignUp = (tourId) => {
-    console.log(`Запись на тур с ID: ${tourId}`);
-
-    /** TODO Логика записи на тур */
+    axiosClient
+      .post(`/tours/${tourId}/signup`)
+      .catch((err) => {
+        // Временное решение
+        console.log(err);
+      });
   };
 
   return (
@@ -37,7 +40,7 @@ export default function TourFeed() {
             participants={data.tour.participants}
             onSignUp={() => handleSignUp(data.tour.id)}
             isParticipants = {data.user_is_participant}
-            maxParticipants={data.tour.maxParticipants}
+            maxParticipants={data.tour.max_participants}
           />
         ))}
       </div>
