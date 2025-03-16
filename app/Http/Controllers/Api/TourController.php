@@ -26,8 +26,19 @@ class TourController extends Controller
             ->toArray();
 
         foreach ($tours as $tour) {
+            $tour_creator = $tour->creator;
             $result[] = [
-                'tour' => $tour,
+                'tour' => [
+                    'id' => $tour->id,
+                    'title' => $tour->title,
+                    'distance' => $tour->distance,
+                    'difficulty' => $tour->difficulty,
+                    'participants' => $tour->participants,
+                    'max_participants' => $tour->max_participants,
+                ],
+                'creator' => [
+                    'name' => $tour_creator->name,
+                ],
                 'user_is_participant' => in_array($tour->id, $participatingTourIds),
             ];
         }
@@ -37,7 +48,14 @@ class TourController extends Controller
 
     public function getTour(Request $request, $id)
     {
-        return Tour::findOrFail($id);
+        $tour = Tour::findOrFail($id);
+        return [
+            'tour' => $tour,
+            'creator' => [
+                'name' => $tour->creator->name,
+            ],
+            'user_is_participant' => in_array(Auth::user()->id, $tour->participants() ->pluck('user_id')->toArray()),
+        ];
     }
 
     public function create(request $request)

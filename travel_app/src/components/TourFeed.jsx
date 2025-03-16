@@ -34,8 +34,8 @@ export default function TourFeed() {
             id={data.tour.id}
             title={data.tour.title}
             imageUrl={data.tour.imageUrl}
-            creatorName={data.tour.creatorName}
-            creatorAvatar={data.tour.creatorAvatar}
+            creatorName={data.creator.name}
+            creatorAvatar={data.creator.avatar}
             difficulty={data.tour.difficulty}
             distance={data.tour.distance}
             participants={data.tour.participants}

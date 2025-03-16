@@ -10,7 +10,7 @@ import axiosClient from "../axios-client.js";
 
 export default function TourDetail() {
   const {id} = useParams();
-  const [tour, setTour] = useState(null);
+  const [tourData, setTourData] = useState(null);
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,8 +20,8 @@ export default function TourDetail() {
     axiosClient
       .get(`/tour/${id}`)
       .then(({data}) => {
-        console.log(data);
-        setTour(data);
+        setTourData(data);
+        setIsSignedUp(data.user_is_participant)
         setLoading(false);
       })
       .catch((err) => {
@@ -33,13 +33,17 @@ export default function TourDetail() {
   }, [id]);
 
   const handleSignUp = () => {
-    setIsSignedUp(true);
-    onSignUp();
+    axiosClient
+      .post(`/tours/${id}/signup`)
+      .catch((err) => {
+        console.log(err);
+        setError("Не удалось записаться на тур");
+      });
   };
 
   const copyChecklist = () => {
-    if (tour?.checklist?.length > 0) {
-      const checklistText = tour.checklist.join("\n");
+    if (tourData?.checklist?.length > 0) {
+      const checklistText = tourData.checklist.join("\n");
       navigator.clipboard.writeText(checklistText)
         .then(() => alert("Вы скопировали список"))
         .catch(() => alert("Ошибка копирования списка"));
@@ -48,17 +52,17 @@ export default function TourDetail() {
 
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
   if (error) return <div className="min-h-screen bg-gray-100 p-6 text-red-500">{error}</div>;
-  if (!tour) return <div className="min-h-screen bg-gray-100 p-6">Тур не найден</div>;
+  if (!tourData) return <div className="min-h-screen bg-gray-100 p-6">Тур не найден</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900">{tour.title}</h1>
-          {tour.image_url ? (
+          <h1 className="text-4xl font-bold text-gray-900">{tourData.title}</h1>
+          {tourData.tour.image_url ? (
             <img
-              src={tour.image_url}
-              alt={tour.title}
+              src={tourData.tour.image_url}
+              alt={tourData.tour.title}
               className="w-full h-96 object-cover rounded-lg shadow-md"
             />
           ) : (
@@ -69,29 +73,29 @@ export default function TourDetail() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Avatar className="h-12 w-12">
-            {tour.creator_avatar ? (
-              <AvatarImage src={tour.creator_avatar} alt={tour.creator_name}/>
+          <Avatar className="h-8 w-8">
+            {tourData.creator.avatar ? (
+              <AvatarImage src={tourData.creator.avatar} alt={tourData.creator.name}/>
             ) : (
-              <AvatarFallback>
-                {tour.creator_name?.charAt(0).toUpperCase()}
+              <AvatarFallback className="bg-gray-200">
+                {tourData.creator.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             )}
           </Avatar>
-          <p className="text-gray-600">Создатель: {tour.creator_name}</p>
+          <p className="text-gray-600">Создатель: {tourData.creator.name}</p>
         </div>
 
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">Сложность: {tour.difficulty}</Badge>
+            <Badge variant="secondary">Сложность: {tourData.tour.difficulty}</Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">Дистанция: {tour.distance}</Badge>
+            <Badge variant="secondary">Дистанция: {tourData.tour.distance}</Badge>
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-gray-600"/>
             <span>
-              {tour.participants} / {tour.max_participants || "∞"} участников
+              {tourData.tour.participants} / {tourData.tour.max_participants || "∞"} участников
             </span>
           </div>
         </div>
@@ -100,13 +104,13 @@ export default function TourDetail() {
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-gray-600"/>
             <span>
-              {new Date(tour.date_start).toLocaleDateString()} -{" "}
-              {new Date(tour.date_end).toLocaleDateString()}
+              {new Date(tourData.tour.date_start).toLocaleDateString()} -{" "}
+              {new Date(tourData.tour.date_end).toLocaleDateString()}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-gray-600"/>
-            <span>{tour.location}</span>
+            <span>{tourData.tour.location}</span>
           </div>
         </div>
 
@@ -115,14 +119,14 @@ export default function TourDetail() {
             <AccordionTrigger className="text-lg font-semibold cursor-pointer">
               Описание тура
             </AccordionTrigger>
-            <AccordionContent>{tour.description}</AccordionContent>
+            <AccordionContent>{tourData.tour.description}</AccordionContent>
           </AccordionItem>
         </Accordion>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-gray-900">Что взять с собой</h2>
-            {tour.checklist?.length > 0 && (
+            {tourData.tour.checklist?.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
@@ -134,9 +138,9 @@ export default function TourDetail() {
               </Button>
             )}
           </div>
-          {tour.checklist?.length > 0 ? (
+          {tourData.tour.checklist?.length > 0 ? (
             <ul className="space-y-2">
-              {tour.checklist.map((item, index) => (
+              {tourData.tour.checklist.map((item, index) => (
                 <li key={index} className="flex items-center gap-2">
                   <Checkbox id={`checklist-${index}`}/>
                   <label
