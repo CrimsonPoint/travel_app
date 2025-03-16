@@ -63,7 +63,7 @@ class TourController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'difficulty' => 'required|int|max:2',
-            'distance' => 'required|int|max:3',
+            'distance' => 'required|int',
             'description' => 'nullable|string',
             'max_participants' => 'nullable|int',
             'date_start' => 'nullable|string',
