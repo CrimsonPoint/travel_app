@@ -18,7 +18,9 @@ yarn-error.log
 /.idea
 /.vscode
 /tmp/*
+/tmp/db/
 /travel_app/node_modules
 /travel_app/dist
 /travel_app/dist-ssr
 /travel_app/*.local
+/tmp/
