@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Menu, Users, LayoutDashboard, House } from "lucide-react";
+import { Menu, Users, LayoutDashboard, House, MapPinPlusInside, SquareChartGantt } from "lucide-react";
 
 export default function DefaultLayout() {
   const { user, token, setUser, setToken } = useStateContext();
@@ -63,6 +63,18 @@ export default function DefaultLayout() {
       link : "users",
       title : "Пользователи",
       icon : <Users className="h-5 w-5" />,
+      access : true
+    },
+    {
+      link : "create_tour",
+      title : "Создать тур",
+      icon : <MapPinPlusInside className="h-5 w-5" />,
+      access : true
+    },
+    {
+      link : "moderate_tours",
+      title : "Модерирование туров",
+      icon : <SquareChartGantt className="h-5 w-5" />,
       access : true
     }
 ];

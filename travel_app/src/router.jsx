@@ -9,6 +9,7 @@ import Dashboard from "./views/Dashboard.jsx";
 import Home from "./views/Home.jsx";
 import CreateTour from "./views/CreateTour.jsx";
 import TourDetailPage from "./views/TourDetailPage.jsx";
+import ModerateTours from "./views/ModerateTours.jsx";
 
 const router = createBrowserRouter([
   {
@@ -36,8 +37,12 @@ const router = createBrowserRouter([
         element: <TourDetailPage/>,
       },
       {
-        path: "/create-tour",
+        path: "/create_tour",
         element: <CreateTour/>,
+      },
+      {
+        path: "/moderate_tours",
+        element: <ModerateTours/>,
       },
     ]
   },

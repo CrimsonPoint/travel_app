@@ -35,6 +35,8 @@ class TourController extends Controller
                     'difficulty' => $tour->difficulty,
                     'participants' => $tour->participants,
                     'max_participants' => $tour->max_participants,
+                    'date_start' => $tour->date_start,
+                    'date_end' => $tour->date_end,
                 ],
                 'creator' => [
                     'name' => $tour_creator->name,

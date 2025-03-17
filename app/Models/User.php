@@ -66,4 +66,9 @@ class User extends Authenticatable
 
         return $userRoleLvl->lvl;
     }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->isAdmin();
+    }
 }

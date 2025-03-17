@@ -64,7 +64,6 @@ export default function CreateTour() {
       participants: 1,
     };
 
-    console.log(dataToSend)
     axiosClient
       .post("/tour/create", dataToSend)
       .then(({data}) => {
