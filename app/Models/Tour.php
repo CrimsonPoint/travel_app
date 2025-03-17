@@ -23,7 +23,8 @@ class Tour extends Model
         'date_end',
         'location',
         'checklist',
-        'extra_fields'
+        'extra_fields',
+        'max_participants'
     ];
 
     protected $casts = [

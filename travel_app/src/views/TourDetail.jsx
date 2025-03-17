@@ -27,8 +27,6 @@ export default function TourDetail() {
       .catch((err) => {
         setError("Не удалось загрузить данные тура");
         setLoading(false);
-        console.log(id)
-        console.log(err);
       });
   }, [id]);
 
@@ -42,8 +40,8 @@ export default function TourDetail() {
   };
 
   const copyChecklist = () => {
-    if (tourData?.checklist?.length > 0) {
-      const checklistText = tourData.checklist.join("\n");
+    if (tourData?.tour?.checklist?.length > 0) {
+      const checklistText = tourData?.tour?.checklist.join("\n");
       navigator.clipboard.writeText(checklistText)
         .then(() => alert("Вы скопировали список"))
         .catch(() => alert("Ошибка копирования списка"));
