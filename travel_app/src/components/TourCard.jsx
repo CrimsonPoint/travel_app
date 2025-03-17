@@ -13,7 +13,7 @@ export default function TourCard({
   creatorName = "Неизвестный",
   creatorAvatar = null,
   difficulty = "Средняя",
-  distance = "0 км",
+  distance = "0",
   participants = 0,
   maxParticipants = 0,
   onSignUp = () => {
@@ -89,7 +89,7 @@ export default function TourCard({
       <CardContent className="space-y-2">
         <div className="flex gap-2 flex-wrap">
           <Badge variant="secondary">Сложность: {difficulty}</Badge>
-          <Badge variant="secondary">Дистанция: {distance}</Badge>
+          <Badge variant="secondary">Дистанция: {distance} км</Badge>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <Users className="h-4 w-4"/>

@@ -88,7 +88,7 @@ export default function TourDetail() {
             <Badge variant="secondary">Сложность: {tourData.tour.difficulty}</Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">Дистанция: {tourData.tour.distance}</Badge>
+            <Badge variant="secondary">Дистанция: {tourData.tour.distance} км</Badge>
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-gray-600"/>
