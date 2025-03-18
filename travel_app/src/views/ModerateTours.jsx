@@ -36,27 +36,24 @@ export default function ModerateTours() {
             .catch((err) => {
               setError("Не удалось загрузить туры");
               setLoading(false);
-              console.log(err);
             });
         }
       })
       .catch((err) => {
         setError("Не удалось проверить права доступа");
         setLoading(false);
-        console.log(err);
       });
   }, [navigate]);
 
   const handleDelete = (id) => {
     if (window.confirm("Вы уверены, что хотите удалить этот тур?")) {
       axiosClient
-        .delete(`/tours/${id}`)
+        .delete(`/tour/${id}`)
         .then(() => {
-          setTours(tours.filter((tour) => tour.id !== id));
+          setTours(tours.filter((data) => data.tour.id !== id));
         })
         .catch((err) => {
           setError("Не удалось удалить тур");
-          console.log(err);
         });
     }
   };
@@ -92,10 +89,11 @@ export default function ModerateTours() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Модерирование туров</h1>
 
-        <Table>
+        <Table className="overflow-x-auto">
           <TableHeader>
             <TableRow>
               <TableHead>Название</TableHead>
+              <TableHead>Описание</TableHead>
               <TableHead>Создатель</TableHead>
               <TableHead>Сложность</TableHead>
               <TableHead>Дистанция</TableHead>
@@ -108,6 +106,7 @@ export default function ModerateTours() {
             {tours.map((data) => (
               <TableRow key={data.tour.id}>
                 <TableCell>{data.tour.title}</TableCell>
+                <TableCell className="max-w-100 truncate">{data.tour.description}</TableCell>
                 <TableCell>{data.creator.name}</TableCell>
                 <TableCell>{data.tour.difficulty}</TableCell>
                 <TableCell>{data.tour.distance}</TableCell>

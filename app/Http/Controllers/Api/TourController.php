@@ -33,6 +33,7 @@ class TourController extends Controller
                     'title' => $tour->title,
                     'distance' => $tour->distance,
                     'difficulty' => $tour->difficulty,
+                    'description' => $tour->description,
                     'participants' => $tour->participants,
                     'max_participants' => $tour->max_participants,
                     'date_start' => $tour->date_start,
@@ -76,6 +77,8 @@ class TourController extends Controller
         ]);
 
         $validated['creator_id'] = Auth::id();
+        $difficulty = ['Легкая', 'Средняя', 'Сложная'];
+        $validated['difficulty'] = $difficulty[$validated['difficulty']];
         $tour = Tour::create($validated);
 
         $this->signUp($request, $tour->id);
@@ -121,6 +124,19 @@ class TourController extends Controller
             'user' => $user->name,
             'tours' => $tours,
         ]);
+    }
+
+    public function delete(string $id)
+    {
+        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => '<UNK> <UNK>'], 403);
+
+        $tour = Tour::findOrFail($id);
+
+        if($tour){
+            $tour->delete();
+        }
+
+        return response()->json(['message' => '<UNK> <UNK> <UNK>']);
     }
 
     public function show(string $id)
