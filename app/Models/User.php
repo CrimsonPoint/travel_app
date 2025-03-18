@@ -71,4 +71,10 @@ class User extends Authenticatable
     {
         return $this->isAdmin();
     }
+
+    public function getIsModeratorAttribute()
+    {
+        $lvl = DB::table('roles')->where('name', '=', 'moderator')->first()->lvl;
+        return $this->getPermissionLvl() == $lvl;
+    }
 }
