@@ -17,8 +17,8 @@ class AuthController extends Controller
 
         if(!Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
             return response()->json([
-                'message' => 'Неверный логин или пароль'
-            ]);
+                'errors' => 'Неверный логин или пароль'
+            ], 403);
         }
 
         /** @var User $user */

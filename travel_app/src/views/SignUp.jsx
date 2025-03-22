@@ -52,10 +52,14 @@ export default function SignUp() {
         setToken(data.token);
       })
       .catch((err) => {
-        const response = err.response;
-        if (response && response.status === 422) {
-          setErrors(response.data.errors);
-        }
+        const errors = err.response?.data?.errors;
+
+        Object.keys(errors).forEach((key) => {
+          const errorMessages = errors[key];
+          errorMessages.forEach((message) => {
+            toast.error(`${key}: ${message}`);
+          });
+        });
       });
   };
 

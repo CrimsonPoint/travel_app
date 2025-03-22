@@ -33,9 +33,12 @@ export default function TourDetail() {
   const handleSignUp = () => {
     axiosClient
       .post(`/tours/${id}/signup`)
+      .then(({data}) => {
+        toast.success("Вы успешно записались на тур");
+        setIsSignedUp(true);
+      })
       .catch((err) => {
-        console.log(err);
-        setError("Не удалось записаться на тур");
+        toast.error(err?.response?.data?.message ?? "Что-то пошло не так");
       });
   };
 
@@ -43,8 +46,8 @@ export default function TourDetail() {
     if (tourData?.tour?.checklist?.length > 0) {
       const checklistText = tourData?.tour?.checklist.join("\n");
       navigator.clipboard.writeText(checklistText)
-        .then(() => alert("Вы скопировали список"))
-        .catch(() => alert("Ошибка копирования списка"));
+        .then(() => toast.success("Вы скопировали список"))
+        .catch(() => toast.error("Что-то пошло не так"));
     }
   };
 
@@ -54,6 +57,7 @@ export default function TourDetail() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">{tourData.title}</h1>

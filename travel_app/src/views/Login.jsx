@@ -36,9 +36,7 @@ export default function Login() {
       })
       .catch((err) => {
         const response = err.response;
-        if (response && response.status === 422) {
-          setErrors(response.data.errors);
-        }
+        toast.error(Object.values(response?.data?.errors))
       });
   };
 
