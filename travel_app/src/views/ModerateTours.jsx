@@ -8,14 +8,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trash2, Edit, Calendar } from "lucide-react";
 import axiosClient from "../axios-client.js";
+import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog";
+import {toast, Toaster} from "sonner";
 
 export default function ModerateTours() {
   const navigate = useNavigate();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editTour, setEditTour] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [tourIdToDelete, setTourIdToDelete] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -23,7 +26,7 @@ export default function ModerateTours() {
       .get("/user")
       .then(({ data }) => {
         if (data.is_admin) {
-          setError("Доступ запрещён");
+          toast.error("Доступ запрещён");
           navigate("/");
         } else {
           setIsAdmin(true);
@@ -34,28 +37,34 @@ export default function ModerateTours() {
               setLoading(false);
             })
             .catch((err) => {
-              setError("Не удалось загрузить туры");
+
               setLoading(false);
             });
         }
       })
       .catch((err) => {
-        setError("Не удалось проверить права доступа");
+        toast.error("Не удалось проверить права доступа");
         setLoading(false);
       });
   }, [navigate]);
 
   const handleDelete = (id) => {
-    if (window.confirm("Вы уверены, что хотите удалить этот тур?")) {
-      axiosClient
-        .delete(`/tour/${id}`)
+    setTourIdToDelete(id);
+    setOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if(!tourIdToDelete) return;
+    axiosClient
+        .delete(`/tour/${tourIdToDelete}`)
         .then(() => {
-          setTours(tours.filter((data) => data.tour.id !== id));
+          setTours(tours.filter((tour) => tour.id !== tourIdToDelete));
+          setOpen(false);
+          toast.success("Тур успешно удалён");
         })
         .catch((err) => {
-          setError("Не удалось удалить тур");
+          toast.error("Не удалось удалить тур");
         });
-    }
   };
 
   const handleEditChange = (e) => {
@@ -74,14 +83,12 @@ export default function ModerateTours() {
         setTours(tours.map((tour) => (tour.id === data.id ? data : tour)));
         setEditTour(null);
       })
-      .catch((err) => {
-        setError("Не удалось сохранить изменения");
-        console.log(err);
+      .catch(() => {
+        toast.error("Не удалось сохранить изменения");
       });
   };
 
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
-  if (error) return <div className="min-h-screen bg-gray-100 p-6 text-red-500">{error}</div>;
   if (!isAdmin) return null;
 
   return (
@@ -137,6 +144,23 @@ export default function ModerateTours() {
             ))}
           </TableBody>
         </Table>
+
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Вы собираетесь удалить этот тур. Это действие нельзя отменить.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Отмена</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>
+                Удалить
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {editTour && (
           <Dialog open={!!editTour} onOpenChange={() => setEditTour(null)}>
