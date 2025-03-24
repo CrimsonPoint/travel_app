@@ -146,7 +146,22 @@ class TourController extends Controller
 
         $tour->update($validated);
 
-        return response()->json();
+        return response()->json([
+            'message' => 'Тур успешно обновлён',
+            'id' => $tour->id,
+            'title' => $tour->title,
+            'description' => $tour->description,
+            'difficulty' => $tour->difficulty,
+            'distance' => $tour->distance,
+            'participants' => $tour->participants,
+            'max_participants' => $tour->max_participants,
+            'date_start' => $tour->date_start,
+            'date_end' => $tour->date_end,
+            'location' => $tour->location,
+            'image_url' => $tour->image_url,
+            'checklist' => $tour->checklist,
+            'creator' => $tour->creator ? ['name' => $tour->creator->name] : null,
+        ], 200);
     }
 
     public function delete(string $id)

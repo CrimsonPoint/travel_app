@@ -100,7 +100,10 @@ export default function ModerateTours() {
     axiosClient
       .put(`/tour/${editTour.id}`, editTour)
       .then(({ data }) => {
-        setTours(tours.map((tour) => (tour.id === data.id ? data : tour)));
+        const updatedTours = tours.map((item) =>
+          item.tour.id === data.id ? { ...item, tour: data } : item
+        );
+        setTours(updatedTours);
         setEditTour(null);
         toast.success("Тур успешно обновлён");
       })
@@ -138,7 +141,7 @@ export default function ModerateTours() {
             <TableBody>
               {tours.map((data) => (
                 <TableRow key={data.tour.id}>
-                  <TableCell>{data.tour.title}</TableCell>
+                  <TableCell>{data?.tour?.title || "Нет названия"}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{data.tour.description}</TableCell>
                   <TableCell>{data.tour.creator?.name || "Неизвестно"}</TableCell>
                   <TableCell>{data.tour.difficulty}</TableCell>
