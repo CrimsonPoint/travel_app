@@ -36,8 +36,10 @@ class TourController extends Controller
                     'description' => $tour->description,
                     'participants' => $tour->participants,
                     'max_participants' => $tour->max_participants,
+                    'location' => $tour->location,
                     'date_start' => $tour->date_start,
                     'date_end' => $tour->date_end,
+                    'checklist' => $tour->checklist,
                 ],
                 'creator' => [
                     'name' => $tour_creator->name,
@@ -65,7 +67,7 @@ class TourController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'difficulty' => 'required|int|max:2',
+            'difficulty' => 'required|string|max:2',
             'distance' => 'required|int',
             'description' => 'nullable|string',
             'max_participants' => 'nullable|int',
@@ -77,8 +79,6 @@ class TourController extends Controller
         ]);
 
         $validated['creator_id'] = Auth::id();
-        $difficulty = ['Легкая', 'Средняя', 'Сложная'];
-        $validated['difficulty'] = $difficulty[$validated['difficulty']];
         $tour = Tour::create($validated);
 
         $this->signUp($request, $tour->id);
@@ -126,9 +126,32 @@ class TourController extends Controller
         ]);
     }
 
+    public function put(Request $request, $id)
+    {
+        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => 'Доступ запрещён'], 403);
+
+        $tour = Tour::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'difficulty' => 'required|string|max:2',
+            'distance' => 'required|int',
+            'description' => 'nullable|string',
+            'max_participants' => 'nullable|int',
+            'date_start' => 'nullable|string',
+            'date_end' => 'nullable|string',
+            'location' => 'nullable|string',
+            'checklist' => 'nullable|array',
+        ]);
+
+        $tour->update($validated);
+
+        return response()->json();
+    }
+
     public function delete(string $id)
     {
-        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => '<UNK> <UNK>'], 403);
+        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => 'Доступ запрещён'], 403);
 
         $tour = Tour::findOrFail($id);
 

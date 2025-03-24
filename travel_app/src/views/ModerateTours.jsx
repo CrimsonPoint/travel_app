@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Edit, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Edit } from "lucide-react";
 import axiosClient from "../axios-client.js";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog";
 import {toast, Toaster} from "sonner";
@@ -19,6 +21,7 @@ export default function ModerateTours() {
   const [editTour, setEditTour] = useState(null);
   const [open, setOpen] = useState(false);
   const [tourIdToDelete, setTourIdToDelete] = useState(null);
+  const [checklistItem, setChecklistItem] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -37,7 +40,7 @@ export default function ModerateTours() {
               setLoading(false);
             })
             .catch((err) => {
-
+              toast.error("Не удалось загрузить туры");
               setLoading(false);
             });
         }
@@ -54,17 +57,17 @@ export default function ModerateTours() {
   };
 
   const confirmDelete = () => {
-    if(!tourIdToDelete) return;
+    if (!tourIdToDelete) return;
     axiosClient
-        .delete(`/tour/${tourIdToDelete}`)
-        .then(() => {
-          setTours(tours.filter((tour) => tour.id !== tourIdToDelete));
-          setOpen(false);
-          toast.success("Тур успешно удалён");
-        })
-        .catch((err) => {
-          toast.error("Не удалось удалить тур");
-        });
+      .delete(`/tour/${tourIdToDelete}`)
+      .then(() => {
+        setTours(tours.filter((tour) => tour.id !== tourIdToDelete));
+        setOpen(false);
+        toast.success("Тур успешно удалён");
+      })
+      .catch(() => {
+        toast.error("Не удалось удалить тур");
+      });
   };
 
   const handleEditChange = (e) => {
@@ -76,12 +79,30 @@ export default function ModerateTours() {
     setEditTour((prev) => ({ ...prev, difficulty: value }));
   };
 
+  const addChecklistItem = () => {
+    if (checklistItem.trim()) {
+      setEditTour((prev) => ({
+        ...prev,
+        checklist: [...prev.checklist, checklistItem.trim()],
+      }));
+      setChecklistItem("");
+    }
+  };
+
+  const removeChecklistItem = (index) => {
+    setEditTour((prev) => ({
+      ...prev,
+      checklist: prev.checklist.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSaveEdit = () => {
     axiosClient
-      .put(`/tours/${editTour.id}`, editTour)
+      .put(`/tour/${editTour.id}`, editTour)
       .then(({ data }) => {
         setTours(tours.map((tour) => (tour.id === data.id ? data : tour)));
         setEditTour(null);
+        toast.success("Тур успешно обновлён");
       })
       .catch(() => {
         toast.error("Не удалось сохранить изменения");
@@ -96,54 +117,66 @@ export default function ModerateTours() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Модерирование туров</h1>
 
-        <Table className="overflow-x-auto">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Название</TableHead>
-              <TableHead>Описание</TableHead>
-              <TableHead>Создатель</TableHead>
-              <TableHead>Сложность</TableHead>
-              <TableHead>Дистанция</TableHead>
-              <TableHead>Участники</TableHead>
-              <TableHead>Даты</TableHead>
-              <TableHead>Действия</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tours.map((data) => (
-              <TableRow key={data.tour.id}>
-                <TableCell>{data.tour.title}</TableCell>
-                <TableCell className="max-w-100 truncate">{data.tour.description}</TableCell>
-                <TableCell>{data.creator.name}</TableCell>
-                <TableCell>{data.tour.difficulty}</TableCell>
-                <TableCell>{data.tour.distance}</TableCell>
-                <TableCell>{data.tour.participants} / {data.tour.max_participants || "∞"}</TableCell>
-                <TableCell>
-                  {new Date(data.tour.date_start).toLocaleDateString()} -{" "}
-                  {new Date(data.tour.date_end).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditTour(data.tour)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(data.tour.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[150px]">Название</TableHead>
+                <TableHead className="min-w-[200px]">Описание</TableHead>
+                <TableHead className="min-w-[120px]">Создатель</TableHead>
+                <TableHead className="min-w-[100px]">Сложность</TableHead>
+                <TableHead className="min-w-[100px]">Дистанция</TableHead>
+                <TableHead className="min-w-[120px]">Участники</TableHead>
+                <TableHead className="min-w-[150px]">Макс. участников</TableHead>
+                <TableHead className="min-w-[200px]">Даты</TableHead>
+                <TableHead className="min-w-[150px]">Местоположение</TableHead>
+                <TableHead className="min-w-[200px]">URL изображения</TableHead>
+                <TableHead className="min-w-[200px]">Чеклист</TableHead>
+                <TableHead className="min-w-[120px]">Действия</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {tours.map((data) => (
+                <TableRow key={data.tour.id}>
+                  <TableCell>{data.tour.title}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{data.tour.description}</TableCell>
+                  <TableCell>{data.tour.creator?.name || "Неизвестно"}</TableCell>
+                  <TableCell>{data.tour.difficulty}</TableCell>
+                  <TableCell>{data.tour.distance}</TableCell>
+                  <TableCell>{data.tour.participants}</TableCell>
+                  <TableCell>{data.tour.max_participants || "∞"}</TableCell>
+                  <TableCell>
+                    {new Date(data.tour.date_start).toLocaleDateString()} -{" "}
+                    {new Date(data.tour.date_end).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{data.tour.location}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{data.tour.image_url}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">
+                    {data.tour.checklist?.join(", ") || "Пусто"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditTour(data.tour)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(data.tour.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
         <AlertDialog open={open} onOpenChange={setOpen}>
           <AlertDialogContent>
@@ -155,16 +188,14 @@ export default function ModerateTours() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Отмена</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete}>
-                Удалить
-              </AlertDialogAction>
+              <AlertDialogAction onClick={confirmDelete}>Удалить</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
         {editTour && (
           <Dialog open={!!editTour} onOpenChange={() => setEditTour(null)}>
-            <DialogContent>
+            <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Редактировать тур: {editTour.title}</DialogTitle>
               </DialogHeader>
@@ -179,6 +210,25 @@ export default function ModerateTours() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="description">Описание</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={editTour.description || ""}
+                    onChange={handleEditChange}
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="creator_name">Создатель</Label>
+                  <Input
+                    id="creator_name"
+                    value={editTour.creator?.name || "Неизвестно"}
+                    disabled
+                    className="bg-gray-200"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="difficulty">Сложность</Label>
                   <Select
                     value={editTour.difficulty}
@@ -188,9 +238,9 @@ export default function ModerateTours() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Легкая">Легкая</SelectItem>
-                      <SelectItem value="Средняя">Средняя</SelectItem>
-                      <SelectItem value="Сложная">Сложная</SelectItem>
+                      <SelectItem value="1">Легкая</SelectItem>
+                      <SelectItem value="2">Средняя</SelectItem>
+                      <SelectItem value="3">Сложная</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -201,6 +251,28 @@ export default function ModerateTours() {
                     name="distance"
                     value={editTour.distance}
                     onChange={handleEditChange}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="participants">Участники</Label>
+                  <Input
+                    id="participants"
+                    name="participants"
+                    type="number"
+                    value={editTour.participants}
+                    onChange={handleEditChange}
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="max_participants">Макс. участников</Label>
+                  <Input
+                    id="max_participants"
+                    name="max_participants"
+                    type="number"
+                    value={editTour.max_participants || ""}
+                    onChange={handleEditChange}
+                    min="1"
                   />
                 </div>
                 <div>
@@ -224,14 +296,50 @@ export default function ModerateTours() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="max_participants">Макс. участников</Label>
+                  <Label htmlFor="location">Местоположение</Label>
                   <Input
-                    id="max_participants"
-                    name="max_participants"
-                    type="number"
-                    value={editTour.max_participants || ""}
+                    id="location"
+                    name="location"
+                    value={editTour.location || ""}
                     onChange={handleEditChange}
                   />
+                </div>
+                <div>
+                  <Label htmlFor="image_url">URL изображения</Label>
+                  <Input
+                    id="image_url"
+                    name="image_url"
+                    type="url"
+                    value={editTour.image_url || ""}
+                    onChange={handleEditChange}
+                  />
+                </div>
+                <div>
+                  <Label>Чеклист</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      value={checklistItem}
+                      onChange={(e) => setChecklistItem(e.target.value)}
+                      placeholder="Добавить элемент чеклиста"
+                      onKeyPress={(e) => e.key === "Enter" && addChecklistItem()}
+                    />
+                    <Button type="button" onClick={addChecklistItem}>
+                      Добавить
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {editTour.checklist?.map((item, index) => (
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                        {item}
+                        <p
+                          className="h-4 w-4 cursor-pointer"
+                          onClick={() => removeChecklistItem(index)}
+                        >
+                          x
+                        </p>
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="mt-6 flex gap-2 justify-end">

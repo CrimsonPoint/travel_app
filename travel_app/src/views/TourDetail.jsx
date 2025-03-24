@@ -57,7 +57,6 @@ export default function TourDetail() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">{tourData.title}</h1>
