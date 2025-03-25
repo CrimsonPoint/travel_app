@@ -21,36 +21,42 @@ export default function TourCard({
   isParticipants = false,
 }) {
   const [isSignedUp, setIsSignedUp] = useState(isParticipants);
+  const [tourParticipants, setTourParticipants] = useState(participants);
 
-  const handleSignUp = () => {
-    setIsSignedUp(true);
-    onSignUp();
+  const handleSignUp = function () {
+    onSignUp()
+      .then(() => {
+        setIsSignedUp(true);
+        setTourParticipants(tourParticipants + 1);
+      })
+      .catch(() => {
+
+      });
   };
 
   let difficulties = [
     {
       id: 1,
       name: "Легкая",
-      colorClass: 'bg-green-500',
+      colorClass: 'bg-green-200',
     },
     {
       id: 2,
       name: "Средняя",
-      colorClass: 'bg-yellow-500',
+      colorClass: 'bg-yellow-200',
     },
     {
       id: 3,
-      name: "Тяжелая",
-      colorClass: 'bg-red-500',
+      name: "Высокая",
+      colorClass: 'bg-red-200',
     },
   ]
   const getDifficulty = (lvl) => {
-    difficulties.map((difficulty) => {
-      if (difficulty.id === lvl) {
-
-      }
-    })
+    const difficulty = difficulties.find((d) => d.id === Number(lvl));
+    return difficulty ? difficulty : { name: 'Неизвестно' };
   }
+
+  const tourDifficulty = getDifficulty(difficulty);
 
   return (
     <Card className="w-full max-w-sm overflow-hidden">
@@ -87,13 +93,13 @@ export default function TourCard({
       </CardHeader>
 
       <CardContent className="space-y-2">
-        <div className="flex gap-2 flex-wrap">
-          <Badge variant="secondary">Сложность: {difficulty}</Badge>
+        <div className="flex gap-3 flex-wrap">
+          <Badge className={`w-[140px] ${tourDifficulty.colorClass}`} variant="secondary">Сложность: {tourDifficulty.name}</Badge>
           <Badge variant="secondary">Дистанция: {distance} км</Badge>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <Users className="h-4 w-4"/>
-          <span>{participants} / {maxParticipants}  участников</span>
+          <span>{tourParticipants} / {maxParticipants}  участников</span>
         </div>
       </CardContent>
 

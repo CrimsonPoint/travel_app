@@ -100,11 +100,19 @@ class TourController extends Controller
             ], 400);
         }
 
-        $tour->participants()->attach($user->id);
+        if($tour->participants + 1 <= $tour->max_participants){
+            $tour->participants()->attach($user->id);
+            $tour->participants += 1;
+            $tour->save();
 
-        return response()->json([
-            'message' => 'Вы успешно записаны на тур',
-        ]);
+            return response()->json([
+                'message' => 'Вы успешно записаны на тур',
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Места кончились',
+            ], 400);
+        }
     }
 
     public function getUserTours($userId)

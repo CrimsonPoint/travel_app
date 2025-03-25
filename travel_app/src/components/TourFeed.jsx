@@ -1,6 +1,7 @@
 import TourCard from "./TourCard";
 import {useState, useEffect} from "react";
 import axiosClient from "../axios-client.js";
+import {toast} from "sonner";
 
 export default function TourFeed() {
 
@@ -17,11 +18,14 @@ export default function TourFeed() {
   }, []);
 
   const handleSignUp = (tourId) => {
-    axiosClient
+    return axiosClient
       .post(`/tours/${tourId}/signup`)
+      .then((response) => {
+        return response.data;
+      })
       .catch((err) => {
-        // Временное решение
-        console.log(err);
+        toast.error(err?.response?.data?.message ?? "Что-то пошло не так");
+        throw err;
       });
   };
 
