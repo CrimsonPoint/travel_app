@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet } from "react-router-dom";
+import {Link, Navigate, Outlet, useNavigate} from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
 import axiosClient from "../axios-client.js";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { Menu, Users, LayoutDashboard, House, MapPinPlusInside, SquareChartGantt
 
 export default function DefaultLayout() {
   const { user, token, setUser, setToken } = useStateContext();
+  const navigate = useNavigate();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem("sidebarOpen");
@@ -23,6 +24,10 @@ export default function DefaultLayout() {
       setUser({});
       setToken(null);
     });
+  };
+
+  const onProfile = (ev) => {
+    navigate("/profile");
   };
 
   useEffect(() => {
@@ -142,7 +147,7 @@ export default function DefaultLayout() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Мой аккаунт</DropdownMenuLabel>
+              <DropdownMenuLabel onClick={onProfile} className="cursor-pointer">Мой аккаунт</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogout} className="cursor-pointer">
                 Выйти

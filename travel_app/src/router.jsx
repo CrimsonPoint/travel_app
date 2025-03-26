@@ -10,6 +10,7 @@ import Home from "./views/Home.jsx";
 import CreateTour from "./views/CreateTour.jsx";
 import TourDetailPage from "./views/TourDetailPage.jsx";
 import ModerateTours from "./views/ModerateTours.jsx";
+import UserProfile from "./views/UserProfile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "/moderate_tours",
         element: <ModerateTours/>,
+      },
+      {
+        path: "/profile",
+        element: <UserProfile/>,
       },
     ]
   },
