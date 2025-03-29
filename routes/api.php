@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TourController;
@@ -13,6 +14,8 @@ Route::middleware('auth:sanctum')->group(function (){
         return $request->user();
     });
 
+    Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');
+
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');
     Route::get('/tour/{id}', [TourController::class, 'getTour'])->name('api.tours.get_tour');
@@ -20,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::put('/tour/{id}', [TourController::class, 'put'])->name('api.tours.put_tour');
     Route::post('/tours/{id}/signup', [TourController::class, 'signUp'])->name('api.tours.signup');
     Route::get('/users/{userId}/tours', [TourController::class, 'getUserTours'])->name('api.users.tours');
+    Route::get('/users/{userId}/tour-participations', [TourController::class, 'getUserParticipatingTours'])
+        ->name('api.users.participating_tours');
 });
 
 Route::post('/login', [AuthController::class, 'login']);

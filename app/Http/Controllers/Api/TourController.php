@@ -121,12 +121,27 @@ class TourController extends Controller
             return response()->json(['message' => 'Не авторизован'], 401);
         }
 
-        if (!Auth::user()->isAdmin()) {
+        /*if (!Auth::user()->isAdmin()) {
             return response()->json(['message' => 'Доступ запрещен'], 403);
-        }
+        }*/
 
         $user = User::findOrFail($userId);
         $tours = Tour::where('creator_id', '=', $user->id)->get();
+
+        return response()->json([
+            'user' => $user->name,
+            'tours' => $tours,
+        ]);
+    }
+
+    public function getUserParticipatingTours($userId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Не авторизован'], 401);
+        }
+
+        $user = User::findOrFail($userId);
+        $tours = $user->participatingTours;
 
         return response()->json([
             'user' => $user->name,

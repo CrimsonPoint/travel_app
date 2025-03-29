@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {useStateContext} from "../contexts/ContextProvider.jsx";
+import { useNavigate, useParams } from "react-router-dom";
+import { useStateContext } from "../contexts/ContextProvider.jsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LogOut } from "lucide-react";
 import axiosClient from "../axios-client.js";
-import { Toaster, toast } from 'sonner'
-
+import { Toaster, toast } from "sonner";
 
 export default function UserProfile() {
   const navigate = useNavigate();
-  const { user, token, setUser, setToken } = useStateContext();
+  const { userId } = useParams();
+  const { user: currentUser, token, setUser, setToken } = useStateContext();
+  const [profileUser, setProfileUser] = useState(null);
   const [tours, setTours] = useState([]);
+  const [participations, setParticipations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const isOwnProfile = !userId || userId == currentUser.id;
 
   useEffect(() => {
     if (!token) {
@@ -26,15 +30,27 @@ export default function UserProfile() {
     const loadData = async () => {
       setLoading(true);
       try {
-        let currentUser = user;
-        if (!Object.keys(user).length) {
+        let authUser = currentUser;
+        if (!Object.keys(currentUser).length) {
           const { data: userData } = await axiosClient.get("/user");
           setUser(userData);
-          currentUser = userData;
+          authUser = userData;
         }
 
-        const { data: toursData } = await axiosClient.get(`/users/${currentUser.id}/tours`);
-        setTours(toursData.tours);
+        let targetUser;
+        if (userId && userId != authUser.id) {
+          const { data } = await axiosClient.get(`/user/${userId}`);
+          targetUser = data;
+        } else {
+          targetUser = authUser;
+        }
+        setProfileUser(targetUser);
+
+        const { data: toursData } = await axiosClient.get(`/users/${targetUser.id}/tours`);
+        const { data: participationsTours } = await axiosClient.get(`/users/${targetUser.id}/tour-participations`);
+        setTours(toursData.tours || toursData);
+        setParticipations(participationsTours.tours)
+        console.log(participationsTours.tours)
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || "Не удалось загрузить данные");
@@ -43,8 +59,7 @@ export default function UserProfile() {
     };
 
     loadData();
-  }, [token, user, setUser, navigate]);
-
+  }, [token, currentUser, userId, setUser, navigate]);
 
   const handleLogout = () => {
     axiosClient
@@ -61,45 +76,54 @@ export default function UserProfile() {
   };
 
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
-  if (error) toast.error(err.response?.data?.message || "Что-то пошло не так");
-  if (!Object.keys(user).length) return null;
+  if (error) {
+    toast.error(error);
+    return <div className="min-h-screen bg-gray-100 p-6 text-red-500">{error}</div>;
+  }
+  if (!profileUser) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Профиль</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {isOwnProfile ? "Мой профиль" : `Профиль пользователя`}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-center gap-6">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name ? user.name[0] : "U"}</AvatarFallback>
+              <AvatarImage src={profileUser.avatar} alt={profileUser.name} />
+              <AvatarFallback>{profileUser.name ? profileUser.name[0] : "U"}</AvatarFallback>
             </Avatar>
             <div className="text-center sm:text-left">
-              <h2 className="text-xl font-semibold">{user.name}</h2>
-              <p className="text-gray-600">{user.email}</p>
+              <h2 className="text-xl font-semibold">{profileUser.name}</h2>
+              <p className="text-gray-600">{profileUser.email}</p>
               <p className="text-gray-600">
-                Роль: {user.is_admin ? "Администратор" : user.is_moderator ? "Модератор" : "Участник"}
+                Роль: {profileUser.is_admin ? "Администратор" : profileUser.is_moderator ? "Модератор" : "Участник"}
               </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" /> Выйти
-              </Button>
+              {isOwnProfile && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" /> Выйти
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Мои туры</CardTitle>
+            <CardTitle>{isOwnProfile ? "Мои туры" : "Туры пользователя"}</CardTitle>
           </CardHeader>
           <CardContent>
             {tours.length === 0 ? (
-              <p className="text-gray-600">Вы ещё не записаны ни на один тур.</p>
+              <p className="text-gray-600">
+                {isOwnProfile ? "Вы еще не создали ни один тур" : "Этот пользователь еще не создавал туры."}
+              </p>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
@@ -114,6 +138,53 @@ export default function UserProfile() {
                   </TableHeader>
                   <TableBody>
                     {tours.map((tour) => (
+                      <TableRow key={tour.id}>
+                        <TableCell>
+                          <a href={`/tour/${tour.id}`} className="text-blue-600 hover:underline">
+                            {tour.title}
+                          </a>
+                        </TableCell>
+                        <TableCell>{tour.difficulty}</TableCell>
+                        <TableCell>{tour.distance}</TableCell>
+                        <TableCell>
+                          {tour.participants} / {tour.max_participants || "∞"}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(tour.date_start).toLocaleDateString()} -{" "}
+                          {new Date(tour.date_end).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Мои участия</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {participations.length === 0 ? (
+              <p className="text-gray-600">
+                {isOwnProfile ? "Вы ещё не откликнулись ни на один тур." : "Этот пользователь не откликнулся ни на один тур."}
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Название</TableHead>
+                      <TableHead>Сложность</TableHead>
+                      <TableHead>Дистанция</TableHead>
+                      <TableHead>Участники</TableHead>
+                      <TableHead>Даты</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {participations.map((tour) => (
                       <TableRow key={tour.id}>
                         <TableCell>
                           <a href={`/tour/${tour.id}`} className="text-blue-600 hover:underline">
