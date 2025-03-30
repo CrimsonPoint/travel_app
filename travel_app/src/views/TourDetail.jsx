@@ -7,6 +7,7 @@ import {Badge} from "@/components/ui/badge";
 import {Calendar, MapPin, Users, Copy} from "lucide-react";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import axiosClient from "../axios-client.js";
+import { Toaster, toast } from "sonner";
 
 export default function TourDetail() {
   const {id} = useParams();

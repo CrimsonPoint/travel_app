@@ -164,7 +164,9 @@ export default function UserProfile() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Мои участия</CardTitle>
+            <CardTitle>
+              {isOwnProfile ? "Мои участия" : "Участия пользователя"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {participations.length === 0 ? (
