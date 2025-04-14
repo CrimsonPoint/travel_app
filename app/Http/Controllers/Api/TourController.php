@@ -8,26 +8,49 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TourController extends Controller
 {
 
     public function store(Request $request)
     {
-        /**
-         * TODO Написать фильтрацию чтобы отвались только туры которые не были созданы текущим пользователем
-         * Также можно прикрутить филльтрацию по примиум роли, но надо будет добавить поле в модель тура
-         */
+        $query = Tour::query();
 
-        $tours = Tour::all();
+        if ($request->has('search') && $request->search) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->has('difficulty') && $request->difficulty) {
+            $query->where('difficulty', $request->difficulty);
+        }
+
+        if ($request->has('distance_min') && $request->distance_min !== null) {
+            $query->where('distance', '>=', $request->distance_min);
+        }
+
+        if ($request->has('distance_max') && $request->distance_max !== null) {
+            $query->where('distance', '<=', $request->distance_max);
+        }
+
+        if ($request->has('location') && $request->location) {
+            $query->where('location', 'like', '%' . $request->location . '%');
+        }
+
+        if ($request->has('date_start') && $request->date_start) {
+            $query->whereDate('date_start', '>=', $request->date_start);
+        }
+
+        $perPage = 12;
+        $tours = $query->with('creator')->paginate($perPage);
+
         $participatingTourIds = DB::table('tour_user')
             ->where('user_id', Auth::id())
             ->pluck('tour_id')
             ->toArray();
 
-        foreach ($tours as $tour) {
-            $tour_creator = $tour->creator;
-            $result[] = [
+        $result = $tours->map(function ($tour) use ($participatingTourIds) {
+            return [
                 'tour' => [
                     'id' => $tour->id,
                     'title' => $tour->title,
@@ -40,16 +63,24 @@ class TourController extends Controller
                     'date_start' => $tour->date_start,
                     'date_end' => $tour->date_end,
                     'checklist' => $tour->checklist,
+                    'imageUrl' => $tour->image_url, // Исправлено с imageUrl на image_url
                 ],
                 'creator' => [
-                    'name' => $tour_creator->name,
+                    'name' => $tour->creator->name,
+                    'avatar' => $tour->creator->avatar ?? null,
                 ],
                 'user_is_participant' => in_array($tour->id, $participatingTourIds),
             ];
-        }
+        });
 
-        return $result;
+        return response()->json([
+            'data' => $result,
+            'current_page' => $tours->currentPage(),
+            'last_page' => $tours->lastPage(),
+            'total' => $tours->total(),
+        ]);
     }
+
 
     public function getTour(Request $request, $id)
     {
