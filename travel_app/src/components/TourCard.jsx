@@ -7,18 +7,18 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 
 export default function TourCard({
-                                   id,
-                                   title = "Без названия",
-                                   imageUrl = null,
-                                   creatorName = "Неизвестный",
-                                   creatorAvatar = null,
-                                   difficulty = "Средняя",
-                                   distance = "0",
-                                   participants = 0,
-                                   maxParticipants = 0,
-                                   onSignUp = () => {},
-                                   isParticipants = false,
-                                 }) {
+        id,
+        title = "Без названия",
+        imageUrl = null,
+        creatorName = "Неизвестный",
+        creatorAvatar = null,
+        difficulty = "Средняя",
+        distance = "0",
+        participants = 0,
+        maxParticipants = 0,
+        onSignUp = () => {},
+        isParticipants = false,
+    }) {
   const [isSignedUp, setIsSignedUp] = useState(isParticipants)
   const [tourParticipants, setTourParticipants] = useState(participants)
 

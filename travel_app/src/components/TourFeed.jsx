@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Filter, MapPin, X } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {Filter, MapPin, Search, X} from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 export default function TourFeed() {
   const [tours, setTours] = useState([]);
@@ -17,7 +17,7 @@ export default function TourFeed() {
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({
     difficulty: "",
-    distance: [0, 50],
+    distance: [0, 100],
     location: "",
     date_start: "",
   });
@@ -43,12 +43,12 @@ export default function TourFeed() {
 
   useEffect(() => {
     fetchTours();
-  }, [search, page, filters]);
+  }, [page, filters]);
 
   useEffect(() => {
     let count = 0;
     if (filters.difficulty) count++;
-    if (filters.distance[0] > 0 || filters.distance[1] < 50) count++;
+    if (filters.distance[0] > 0 || filters.distance[1] < 100) count++;
     if (filters.location) count++;
     if (filters.date_start) count++;
     setActiveFiltersCount(count);
@@ -80,7 +80,7 @@ export default function TourFeed() {
   const resetFilters = () => {
     setFilters({
       difficulty: "",
-      distance: [0, 50],
+      distance: [0, 100],
       location: "",
       date_start: "",
     });
@@ -103,15 +103,9 @@ export default function TourFeed() {
   };
 
   const FilterContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Фильтры</h3>
-        {activeFiltersCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8 px-2">
-            <X className="h-4 w-4 mr-1" />
-            Сбросить
-          </Button>
-        )}
+        <SheetTitle>Фильтры</SheetTitle>
       </div>
 
       <div className="space-y-4">
@@ -137,8 +131,7 @@ export default function TourFeed() {
           <label className="text-sm font-medium mb-1.5 block">Дистанция (км)</label>
           <Slider
             min={0}
-            max={50}
-            step={1}
+            max={100}
             value={filters.distance}
             onValueChange={(value) => handleFilterChange("distance", value)}
             className="mt-2"
@@ -171,24 +164,40 @@ export default function TourFeed() {
           />
         </div>
       </div>
+      {activeFiltersCount > 0 && (
+        <Button variant="ghost" size="sm" onClick={resetFilters} className="bg-red-50 mt-auto h-8 px-2">
+          <X className="h-4 w-4 mr-1" />
+          Сбросить
+        </Button>
+      )}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
             <div className="mb-6 space-y-4">
               <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <div className="relative gap-5 flex sm:w-120">
-                    <Input
-                      placeholder="Поиск по названию тура"
-                      value={search}
-                      onChange={handleSearchChange}
-                      className="pl-9"
-                    />
+                  <div className="relative gap-4 flex">
+                    <div className="flex sm:w-120">
+                      <Input
+                        placeholder="Поиск по названию тура"
+                        value={search}
+                        onChange={handleSearchChange}
+                        onKeyUp={(e) => {
+                          if (e.key === 'Enter') {
+                            fetchTours();
+                          }
+                        }}
+                        className="pl-9"
+                      />
+                      <Button onClick={fetchTours} variant="outline" size="icon" className="shrink-0">
+                        <Search className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="icon" className="shrink-0">
@@ -219,12 +228,12 @@ export default function TourFeed() {
                       />
                     </Badge>
                   )}
-                  {(filters.distance[0] > 0 || filters.distance[1] < 50) && (
+                  {(filters.distance[0] > 0 || filters.distance[1] < 100) && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       Дистанция: {filters.distance[0]}-{filters.distance[1]} км
                       <X
                         className="h-3 w-3 ml-1 cursor-pointer"
-                        onClick={() => handleFilterChange("distance", [0, 50])}
+                        onClick={() => handleFilterChange("distance", [0, 100])}
                       />
                     </Badge>
                   )}
@@ -260,7 +269,7 @@ export default function TourFeed() {
                     imageUrl={data.tour.imageUrl}
                     creatorName={data.creator.name}
                     creatorAvatar={data.creator.avatar}
-                    difficulty={difficultyLabels[data.tour.difficulty] || data.tour.difficulty}
+                    difficulty={data.tour.difficulty}
                     distance={data.tour.distance}
                     participants={data.tour.participants}
                     onSignUp={() => handleSignUp(data.tour.id)}

@@ -63,7 +63,7 @@ class TourController extends Controller
                     'date_start' => $tour->date_start,
                     'date_end' => $tour->date_end,
                     'checklist' => $tour->checklist,
-                    'imageUrl' => $tour->image_url, // Исправлено с imageUrl на image_url
+                    'imageUrl' => $tour->image_url,
                 ],
                 'creator' => [
                     'name' => $tour->creator->name,
