@@ -36,7 +36,7 @@ export default function ModerateTours() {
           axiosClient
             .post("/tours")
             .then(({ data }) => {
-              setTours(data);
+              setTours(data.data);
               setLoading(false);
             })
             .catch((err) => {

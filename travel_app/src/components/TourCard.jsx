@@ -21,6 +21,7 @@ export default function TourCard({
     }) {
   const [isSignedUp, setIsSignedUp] = useState(isParticipants)
   const [tourParticipants, setTourParticipants] = useState(participants)
+  const baseUrl = "http://localhost:8876";
 
   const handleSignUp = () => {
     onSignUp()
@@ -68,7 +69,7 @@ export default function TourCard({
         <div className="relative h-48 w-full overflow-hidden">
           {imageUrl ? (
             <img
-              src={imageUrl || "/placeholder.svg"}
+              src={`${baseUrl}/` + imageUrl || "/placeholder.svg"}
               alt={title}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />

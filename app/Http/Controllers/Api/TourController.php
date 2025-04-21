@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TourController extends Controller
 {
@@ -94,30 +95,52 @@ class TourController extends Controller
         ];
     }
 
-    public function create(request $request)
+    public function create(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'difficulty' => 'required|string|max:2',
-            'distance' => 'required|int',
+            'difficulty' => 'required|in:1,2,3',
+            'distance' => 'required|numeric|min:0',
             'description' => 'nullable|string',
-            'max_participants' => 'nullable|int',
-            'date_start' => 'nullable|string',
-            'date_end' => 'nullable|string',
-            'location' => 'nullable|string',
-            'checklist' => 'nullable|array',
-            'extra_fields' => 'nullable|array',
+            'max_participants' => 'required|integer|min:2',
+            'date_start' => 'required|date|after:now',
+            'date_end' => 'required|date|after:date_start',
+            'location' => 'nullable|string|max:255',
+            'checklist' => 'nullable|json',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $validated['creator_id'] = Auth::id();
-        $tour = Tour::create($validated);
+        $data = $validated;
+        $data['creator_id'] = Auth::id();
+        $data['participants'] = 1;
+        $data['checklist'] = $request->checklist ? json_decode($request->checklist, true) : [];
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('tours', 'public');
+            $data['image_url'] = Storage::url($path);
+        }
+
+        $tour = Tour::create($data);
 
         $this->signUp($request, $tour->id);
 
         return response()->json([
             'message' => 'Тур успешно создан',
-            'tour' => $tour,
-        ]);
+            'tour' => [
+                'id' => $tour->id,
+                'title' => $tour->title,
+                'distance' => $tour->distance,
+                'difficulty' => $tour->difficulty,
+                'description' => $tour->description,
+                'participants' => $tour->participants,
+                'max_participants' => $tour->max_participants,
+                'location' => $tour->location,
+                'date_start' => $tour->date_start,
+                'date_end' => $tour->date_end,
+                'checklist' => $tour->checklist,
+                'image_url' => $tour->image_url,
+            ],
+        ], 201);
     }
 
     public function signUp(Request $request, $id)
