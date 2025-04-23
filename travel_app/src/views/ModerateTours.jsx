@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit, CheckCheck } from "lucide-react";
 import axiosClient from "../axios-client.js";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog";
 import {toast, Toaster} from "sonner";
@@ -34,7 +34,7 @@ export default function ModerateTours() {
         } else {
           setIsAdmin(true);
           axiosClient
-            .post("/tours")
+            .post("/tours", {getAllStatuses: true})
             .then(({ data }) => {
               setTours(data.data);
               setLoading(false);
@@ -55,6 +55,17 @@ export default function ModerateTours() {
     setTourIdToDelete(id);
     setOpen(true);
   };
+
+  const handleApprove = (id) => {
+    axiosClient
+      .patch(`/tour/${id}/status`, {status: 2})
+      .then(() => {
+        toast.success("Статус обновлен");
+      })
+      .catch(() => {
+        toast.error("Что-то пошло не так");
+      });
+  }
 
   const confirmDelete = () => {
     if (!tourIdToDelete) return;
@@ -172,6 +183,13 @@ export default function ModerateTours() {
                         onClick={() => handleDelete(data.tour.id)}
                       >
                         <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleApprove(data.tour.id)}
+                      >
+                        <CheckCheck className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

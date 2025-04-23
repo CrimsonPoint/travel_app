@@ -18,6 +18,10 @@ class TourController extends Controller
     {
         $query = Tour::query();
 
+        if ($request->missing('getAllStatuses')) {
+            $query->whereIn('status', Tour::getActiveStatuses());
+        }
+
         if ($request->has('search') && $request->search) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
@@ -185,6 +189,32 @@ class TourController extends Controller
         return response()->json([
             'user' => $user->name,
             'tours' => $tours,
+        ]);
+    }
+
+    public function setTourStatus(Request $request, $id)
+    {
+        $tour = Tour::findOrFail($id);
+
+        if ($tour->creator_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'У вас нет прав для изменения статуса этого тура',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => ['required', 'int', 'in:' . implode(',', Tour::getAllStatuses())],
+        ]);
+
+        $tour->status = $validated['status'];
+        $tour->save();
+
+        return response()->json([
+            'message' => 'Статус обновлен',
+            'tour' => [
+                'id' => $tour->id,
+                'status' => $tour->status,
+            ],
         ]);
     }
 

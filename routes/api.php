@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::put('/tour/{id}', [TourController::class, 'put'])->name('api.tours.put_tour');
     Route::post('/tours/{id}/signup', [TourController::class, 'signUp'])->name('api.tours.signup');
     Route::get('/users/{userId}/tours', [TourController::class, 'getUserTours'])->name('api.users.tours');
+    Route::patch('/tour/{id}/status', [TourController::class, 'setTourStatus'])->name('api.tour.status');
     Route::get('/users/{userId}/tour-participations', [TourController::class, 'getUserParticipatingTours'])
         ->name('api.users.participating_tours');
 });

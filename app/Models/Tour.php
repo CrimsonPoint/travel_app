@@ -11,6 +11,10 @@ class Tour extends Model
 
     protected $table = 'tours';
 
+    const NOT_VERIFIED_STATUS = 0;
+    const APPROVED_STATUS = 2;
+    const COMPLETED_STATUS = 4;
+
     protected $fillable = [
         'title',
         'image_url',
@@ -35,6 +39,22 @@ class Tour extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public static function getActiveStatuses(): array
+    {
+        return [
+            self::APPROVED_STATUS
+        ];
+    }
+
+    public static function getAllStatuses(): array
+    {
+        return [
+            self::NOT_VERIFIED_STATUS,
+            self::APPROVED_STATUS,
+            self::COMPLETED_STATUS
+        ];
     }
 
     public function participants()
