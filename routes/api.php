@@ -15,6 +15,13 @@ Route::middleware('auth:sanctum')->group(function (){
     });
 
     Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');
+    Route::get('/users', [UserController::class, 'index'])->name('api.users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('api.users.store');
+    Route::patch('/users/{id}/roles', [UserController::class, 'updateRoles'])->name('api.users.roles');
+    Route::patch('/users/{id}/block', [UserController::class, 'toggleBlock'])->name('api.users.block');
+    Route::patch('/users/{id}/verify', [UserController::class, 'verify'])->name('api.users.verify');
+
+    Route::get('/roles', [UserController::class, 'getRoles'])->name('api.roles.index');
 
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');

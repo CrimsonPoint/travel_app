@@ -185,6 +185,7 @@ export default function ModerateTours() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                       <Button
+                        {...(data.tour.status > 0 ? {disabled: true} : {})}
                         variant="outline"
                         size="sm"
                         onClick={() => handleApprove(data.tour.id)}

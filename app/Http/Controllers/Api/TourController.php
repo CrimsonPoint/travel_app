@@ -69,6 +69,7 @@ class TourController extends Controller
                     'date_end' => $tour->date_end,
                     'checklist' => $tour->checklist,
                     'imageUrl' => $tour->image_url,
+                    'status' => $tour->status,
                 ],
                 'creator' => [
                     'name' => $tour->creator->name,

@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_blocked',
+        'is_verified',
     ];
 
     /**
@@ -42,6 +44,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_blocked' => 'boolean',
+        'is_verified' => 'boolean',
     ];
 
     public function participatingTours()

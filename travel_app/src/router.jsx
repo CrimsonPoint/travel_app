@@ -11,6 +11,7 @@ import CreateTour from "./views/CreateTour.jsx";
 import TourDetailPage from "./views/TourDetailPage.jsx";
 import ModerateTours from "./views/ModerateTours.jsx";
 import UserProfile from "./views/UserProfile.jsx";
+import UserManagement from "./views/UserManagement.jsx";
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "/profile/:userId",
         element: <UserProfile/>,
+      },
+      {
+        path: "/moderate_users",
+        element: <UserManagement/>,
       },
     ]
   },
