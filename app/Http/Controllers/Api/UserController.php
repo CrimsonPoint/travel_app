@@ -109,7 +109,6 @@ class UserController extends Controller
     public function updateRoles(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $this->authorize('update', $user);
 
         $validated = $request->validate([
             'roles' => 'required|array',
@@ -127,13 +126,10 @@ class UserController extends Controller
     public function toggleBlock(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $this->authorize('update', $user);
-
         $user->is_blocked = !$user->is_blocked;
         $user->save();
 
         return response()->json([
-            'user' => $user->load('roles'),
             'message' => $user->is_blocked ? 'Пользователь заблокирован' : 'Пользователь разблокирован',
         ]);
     }
@@ -141,14 +137,11 @@ class UserController extends Controller
     public function verify(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $this->authorize('update', $user);
-
         $user->is_verified = true;
         $user->email_verified_at = now();
         $user->save();
 
         return response()->json([
-            'user' => $user->load('roles'),
             'message' => 'Пользователь подтвержден',
         ]);
     }

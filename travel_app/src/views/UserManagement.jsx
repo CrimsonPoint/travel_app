@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../axios-client.js";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -129,7 +129,6 @@ export default function UserManagement() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <Toaster />
       <h1 className="text-3xl font-bold mb-6">Управление пользователями</h1>
 
       <div className="mb-6 space-y-4">
