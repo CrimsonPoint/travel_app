@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -41,8 +42,11 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query();
-
+        Log::debug('$request', ['$request' => $request]);
+        Log::debug('has', ['$request' => $request->has('search')]);
+        Log::debug('$request->search', ['$request->search' => $request->search]);
         if ($request->has('search') && $request->search) {
+            Log::debug('asdasd', ['ser' => $request->search]);
             $query->where('name', 'like', '%' . $request->search . '%')
                 ->orWhere('email', 'like', '%' . $request->search . '%');
         }
@@ -127,9 +131,11 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->is_blocked = !$user->is_blocked;
+        $user->tokens()->delete();
         $user->save();
 
         return response()->json([
+            'user' => $user,
             'message' => $user->is_blocked ? 'Пользователь заблокирован' : 'Пользователь разблокирован',
         ]);
     }
@@ -142,6 +148,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
+            'user' => $user,
             'message' => 'Пользователь подтвержден',
         ]);
     }

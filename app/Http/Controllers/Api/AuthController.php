@@ -24,6 +24,11 @@ class AuthController extends Controller
         /** @var User $user */
 
         $user = Auth::user();
+        if ($user->is_blocked) {
+            return response()->json([
+                'errors' => 'Вы заблокированы'
+            ], 403);
+        }
         $user_access_token = $user->createToken('token')->plainTextToken;
 
         return response()->json([
