@@ -7,13 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {Lock, Unlock, CheckCircle, Search} from "lucide-react";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({});
   const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [isBlockedFilter, setIsBlockedFilter] = useState("");
   const [isVerifiedFilter, setIsVerifiedFilter] = useState("");
@@ -35,12 +37,12 @@ export default function UserManagement() {
   useEffect(() => {
     fetchUsers();
     fetchRoles();
-  }, [search, roleFilter, isBlockedFilter, isVerifiedFilter, page]);
+  }, [searchQuery, roleFilter, isBlockedFilter, isVerifiedFilter, page]);
 
   const fetchUsers = () => {
     setLoading(true);
     const params = {
-      search,
+      search: searchQuery,
       role: roleFilter,
       is_blocked: isBlockedFilter,
       is_verified: isVerifiedFilter,
@@ -49,7 +51,7 @@ export default function UserManagement() {
     };
 
     axiosClient
-      .get("/users", { params })
+      .post("/users", { params })
       .then(({ data }) => {
         const normalizedUsers = (data.users || [])
           .filter(user => user && user.id && user.name)
@@ -67,11 +69,23 @@ export default function UserManagement() {
       });
   };
 
+  const handleSearch = () => {
+    setSearchQuery(search);
+    setPage(1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const fetchRoles = () => {
     axiosClient
       .get("/roles")
       .then(({ data }) => {
-        setRoles(data.roles || []);
+        setRoles(data || []);
+        console.log(data)
       })
       .catch((err) => {
         toast.error("Не удалось загрузить роли");
@@ -80,7 +94,7 @@ export default function UserManagement() {
 
   const handleCreateUser = () => {
     axiosClient
-      .post("/users", newUser)
+      .post("/user", newUser)
       .then(({ data }) => {
         toast.success(data.message);
         if (data.user && data.user.id && data.user.name) {
@@ -95,6 +109,7 @@ export default function UserManagement() {
   };
 
   const handleUpdateRoles = (userId, selectedRoles) => {
+    console.log(userId, selectedRoles);
     axiosClient
       .patch(`/users/${userId}/roles`, { roles: selectedRoles })
       .then(({ data }) => {
@@ -159,17 +174,18 @@ export default function UserManagement() {
           placeholder="Поиск по имени или email"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onKeyUp={(e) => {
-            if (e.key === 'Enter') {
-
-            }
-          }}
+          onKeyDown={handleKeyDown}
           className="max-w-md"
         />
-        <Button onClick={console.log(123)} variant="outline" size="icon" className="shrink-0">
+        <Button
+          onClick={handleSearch}
+          variant="outline"
+          size="icon"
+          className="shrink-0"
+        >
           <Search className="h-4 w-4" />
         </Button>
-        <div className="flex gap-4">
+        <div className="flex gap-4 ml-10">
           <Select value={roleFilter} onValueChange={setRoleFilter}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Фильтр по роли" />
@@ -235,7 +251,7 @@ export default function UserManagement() {
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline">
-                  Выбрать роли ({newUser.roles.length})
+                  Выбрать роли
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -243,25 +259,26 @@ export default function UserManagement() {
                   <DialogTitle>Выберите роли</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-2">
-                  {roles.map((role) => (
-                    <div key={role.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`new-role-${role.id}`}
-                        checked={newUser.roles.includes(role.name)}
-                        onCheckedChange={(checked) => {
-                          setNewUser({
-                            ...newUser,
-                            roles: checked
-                              ? [...newUser.roles, role.name]
-                              : newUser.roles.filter((r) => r !== role.name),
-                          });
-                        }}
-                      />
-                      <label htmlFor={`new-role-${role.id}`}>
-                        {role.name} (уровень: {role.lvl})
-                      </label>
-                    </div>
-                  ))}
+                  <Label>Выберите роль:</Label>
+                  <RadioGroup
+                    value={newUser.roles[0] || ""}
+                    onValueChange={(value) => {
+                      setNewUser({
+                        ...newUser,
+                        roles: [value],
+                      });
+                    }}
+                    className="space-y-2"
+                  >
+                    {roles.map((role) => (
+                      <div key={role.id} className="flex items-center space-x-2">
+                        <RadioGroupItem data-state="checked" value={role.name} id={`new-role-${role.id}`}/>
+                        <Label htmlFor={`new-role-${role.id}`}>
+                          {role.name} (уровень допуска: {role.lvl})
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
                 </div>
               </DialogContent>
             </Dialog>
@@ -279,24 +296,24 @@ export default function UserManagement() {
             <DialogTitle>Изменить роли пользователя</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
-            {roles.map((role) => (
-              <div key={role.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`role-${role.id}`}
-                  checked={tempRoles.includes(role.name)}
-                  onCheckedChange={(checked) => {
-                    setTempRoles(
-                      checked
-                        ? [...tempRoles, role.name]
-                        : tempRoles.filter((r) => r !== role.name)
-                    );
-                  }}
-                />
-                <label htmlFor={`role-${role.id}`}>
-                  {role.name} (уровень: {role.lvl})
-                </label>
-              </div>
-            ))}
+            <RadioGroup
+              value={tempRoles[0] || ""}
+              onValueChange={(selectedRole) => {
+                setTempRoles([selectedRole]);
+              }}
+            >
+              {roles.map((role) => (
+                <div key={role.id} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={role.name}
+                    id={`role-${role.id}`}
+                  />
+                  <Label htmlFor={`role-${role.id}`}>
+                    {role.name} (уровень: {role.lvl})
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
           <Button
             onClick={() => handleUpdateRoles(selectedUserId, tempRoles)}
@@ -332,7 +349,7 @@ export default function UserManagement() {
                     Изменить роль
                   </Button>
                   <span className="text-sm text-gray-500">
-                    {user.roles.length > 0 ? user.roles.map((r) => r.name).join(", ") : "Нет"}
+                    {user.role ? user.role : "Нет"}
                   </span>
                 </div>
               </TableCell>

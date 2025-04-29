@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -31,22 +32,18 @@ class UserController extends Controller
 
     public function getRoles(Request $request)
     {
-        $roles = DB::table('roles')->get()->toArray();
-        $result = [];
-
-
+        $roles = DB::table('roles')->get()->map(function ($item) {
+            return (array)$item;
+        })->toArray();
 
         return $roles;
     }
 
     public function index(Request $request)
     {
-        $query = User::query();
-        Log::debug('$request', ['$request' => $request]);
-        Log::debug('has', ['$request' => $request->has('search')]);
-        Log::debug('$request->search', ['$request->search' => $request->search]);
+        $query = User::query()->with('roles:name,id');
+
         if ($request->has('search') && $request->search) {
-            Log::debug('asdasd', ['ser' => $request->search]);
             $query->where('name', 'like', '%' . $request->search . '%')
                 ->orWhere('email', 'like', '%' . $request->search . '%');
         }
@@ -67,9 +64,19 @@ class UserController extends Controller
 
         $perPage = $request->input('per_page', 10);
         $users = $query->paginate($perPage);
+        $transformedUsers = $users->getCollection()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_blocked' => $user->is_blocked,
+                'is_verified' => $user->is_verified,
+                'role' => $user->getRole()->name
+            ];
+        });
 
         return response()->json([
-            'users' => $users->items(),
+            'users' => $transformedUsers,
             'pagination' => [
                 'current_page' => $users->currentPage(),
                 'last_page' => $users->lastPage(),
@@ -82,7 +89,9 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create', User::class);
+        if (!Auth::user()->isAdmin()) {
+            return response()->json(['message' => 'Доступ запрещен'], 403);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -100,12 +109,16 @@ class UserController extends Controller
             'is_blocked' => false,
         ]);
 
-        if (!empty($validated['roles'])) {
-            $user->assignRole($validated['roles']);
+
+        $roleId = DB::table('roles')
+            ->where('name', $validated['roles'])
+            ->first()->id;
+
+        if ($roleId) {
+            $user->setUserRole($roleId);
         }
 
         return response()->json([
-            'user' => $user->load('roles'),
             'message' => 'Пользователь успешно создан',
         ], 201);
     }
@@ -113,16 +126,18 @@ class UserController extends Controller
     public function updateRoles(Request $request, $id)
     {
         $user = User::findOrFail($id);
-
         $validated = $request->validate([
             'roles' => 'required|array',
             'roles.*' => 'string|exists:roles,name',
         ]);
 
-        $user->syncRoles($validated['roles']);
+        $roleId = DB::table('roles')
+            ->where('name', $validated['roles'])
+            ->first()->id;
+
+        $user->setUserRole($roleId);
 
         return response()->json([
-            'user' => $user->load('roles'),
             'message' => 'Роли пользователя обновлены',
         ]);
     }
@@ -135,7 +150,14 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_blocked' => $user->is_blocked,
+                'token' => $user->token,
+                'role' => $user->getRole()->name
+            ],
             'message' => $user->is_blocked ? 'Пользователь заблокирован' : 'Пользователь разблокирован',
         ]);
     }

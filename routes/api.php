@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TrainingController;
 
 
 Route::middleware('auth:sanctum')->group(function (){
@@ -15,11 +16,18 @@ Route::middleware('auth:sanctum')->group(function (){
     });
 
     Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');
-    Route::get('/users', [UserController::class, 'index'])->name('api.users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('api.users.store');
+    Route::post('/users', [UserController::class, 'index'])->name('api.users.index');
+    Route::post('/user', [UserController::class, 'store'])->name('api.user.store');
     Route::patch('/users/{id}/roles', [UserController::class, 'updateRoles'])->name('api.users.roles');
     Route::patch('/users/{id}/block', [UserController::class, 'toggleBlock'])->name('api.users.block');
     Route::patch('/users/{id}/verify', [UserController::class, 'verify'])->name('api.users.verify');
+
+    Route::get('/training-topics', [TrainingController::class, 'index'])->name('api.training.index');
+    Route::get('/training-topics/{trainingTopic}', [TrainingController::class, 'show'])->name('api.training.show');
+    Route::get('/training-records', [TrainingController::class, 'getRecords'])->name('api.training.records');
+    Route::post('/training-topics', [TrainingController::class, 'store'])->name('api.training.store');
+    Route::post('/training-user', [TrainingController::class, 'recordUser'])->name('api.training.record_user');
+    Route::put('/training-topics/{trainingTopic}', [TrainingController::class, 'update'])->name('api.training.update');
 
     Route::get('/roles', [UserController::class, 'getRoles'])->name('api.roles.index');
 

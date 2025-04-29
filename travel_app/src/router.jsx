@@ -12,6 +12,8 @@ import TourDetailPage from "./views/TourDetailPage.jsx";
 import ModerateTours from "./views/ModerateTours.jsx";
 import UserProfile from "./views/UserProfile.jsx";
 import UserManagement from "./views/UserManagement.jsx";
+import SafeTourismPage from "./views/SafeTourismPage.jsx";
+import TrainingPage from "./views/TrainingPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +59,14 @@ const router = createBrowserRouter([
       {
         path: "/moderate_users",
         element: <UserManagement/>,
+      },
+      {
+        path: "/save_tourism",
+        element: <SafeTourismPage/>,
+      },
+      {
+        path: "/save_tourism/:topicId",
+        element: <TrainingPage/>,
       },
     ]
   },

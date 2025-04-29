@@ -54,6 +54,21 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function setUserRole($roleId) {
+        DB::transaction(function () use ($roleId) {
+            DB::table('role_user')
+                ->where('user_id', $this->id)
+                ->delete();
+
+            DB::table('role_user')->insert([
+                'role_id' => $roleId,
+                'user_id' => $this->id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        });
+    }
+
     public function isAdmin() {
         $lvl = DB::table('roles')->where('name', '=', 'admin')->first()->lvl;
         return $this->getPermissionLvl() == $lvl;
@@ -80,5 +95,16 @@ class User extends Authenticatable
     {
         $lvl = DB::table('roles')->where('name', '=', 'moderator')->first()->lvl;
         return $this->getPermissionLvl() == $lvl;
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user')
+            ->withTimestamps();
+    }
+
+    public function getRole()
+    {
+        return $this->roles->first()?->makeHidden('pivot');
     }
 }
