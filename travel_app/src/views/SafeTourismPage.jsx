@@ -29,13 +29,11 @@ const SafeTourismPage = () => {
       })
       .catch((err) => {
         toast.error("Ошибка загрузки тем");
-        console.log(err);
       });
 
     axiosClient
       .get("/training-records")
       .then(({ data }) => {
-        console.log(data);
         setUserRecords(data)
       })
       .catch((err) => {

@@ -129,9 +129,9 @@ export default function ModerateTours() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Модерирование туров</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Модерирование туров</h1>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mt-10">
           <Table>
             <TableHeader>
               <TableRow>

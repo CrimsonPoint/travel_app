@@ -30,6 +30,20 @@ class UserController extends Controller
         }
     }
 
+    public function getAll() {
+        $users = User::all()->toArray();
+
+        $users = array_map(function ($user) {
+            return [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+            ];
+        }, $users);
+
+        return response()->json($users);
+    }
+
     public function getRoles(Request $request)
     {
         $roles = DB::table('roles')->get()->map(function ($item) {

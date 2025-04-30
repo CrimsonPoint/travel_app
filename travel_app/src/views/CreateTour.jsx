@@ -98,14 +98,13 @@ export default function CreateTour() {
       .catch((err) => {
         setLoading(false);
         setError(err.response?.data?.message || "Ошибка при создании тура");
-        console.log(err);
       });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Создать новый тур</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Создать новый тур</h1>
 
         {error && (
           <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
@@ -113,7 +112,7 @@ export default function CreateTour() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-10">
           <div>
             <Label className="mb-2" htmlFor="title">
               Название тура
@@ -137,7 +136,7 @@ export default function CreateTour() {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="mt-1"
+              className="mt-1 h-15"
             />
             {preview && (
               <img

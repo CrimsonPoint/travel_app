@@ -64,7 +64,6 @@ export default function TourDetail() {
   if (error) return <div className="min-h-screen bg-gray-100 p-6 text-red-500">{error}</div>;
   if (!tourData || !tourData.tour) return <div className="min-h-screen bg-gray-100 p-6">Тур не найден</div>;
 
-  console.log(tourData.tour.image_url)
   const imageUrl = tourData.tour.image_url ? `${baseUrl}${tourData.tour.image_url}` : "/placeholder.svg";
 
   return (

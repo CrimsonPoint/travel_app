@@ -85,7 +85,6 @@ export default function UserManagement() {
       .get("/roles")
       .then(({ data }) => {
         setRoles(data || []);
-        console.log(data)
       })
       .catch((err) => {
         toast.error("Не удалось загрузить роли");
@@ -109,7 +108,6 @@ export default function UserManagement() {
   };
 
   const handleUpdateRoles = (userId, selectedRoles) => {
-    console.log(userId, selectedRoles);
     axiosClient
       .patch(`/users/${userId}/roles`, { roles: selectedRoles })
       .then(({ data }) => {
@@ -167,9 +165,9 @@ export default function UserManagement() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Управление пользователями</h1>
+      <h1 className="text-3xl font-bold">Управление пользователями</h1>
 
-      <div className="flex mb-6 space-y-4">
+      <div className="flex mb-6 space-y-4 mt-10">
         <Input
           placeholder="Поиск по имени или email"
           value={search}

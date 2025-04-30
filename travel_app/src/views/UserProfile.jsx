@@ -50,7 +50,6 @@ export default function UserProfile() {
         const { data: participationsTours } = await axiosClient.get(`/users/${targetUser.id}/tour-participations`);
         setTours(toursData.tours || toursData);
         setParticipations(participationsTours.tours)
-        console.log(participationsTours.tours)
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || "Не удалось загрузить данные");
