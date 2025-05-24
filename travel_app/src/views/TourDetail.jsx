@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import axiosClient from "../axios-client.js";
 import { Toaster, toast } from "sonner";
 import YandexMap from "../components/YandexMap.jsx";
+import Chat from "../components/Chat.jsx";
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -82,6 +83,20 @@ export default function TourDetail() {
         {tourData.tour.route && tourData.tour.route.start && tourData.tour.route.end && (
           <YandexMap start={tourData.tour.route.start} end={tourData.tour.route.end} />
         )}
+
+        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* ... существующий код ... */}
+            <Chat tourId={id} isSignedUp={isSignedUp} />
+            <Button
+              className="w-full max-w-xs"
+              onClick={handleSignUp}
+              disabled={isSignedUp}
+            >
+              {isSignedUp ? "Вы записаны" : "Записаться"}
+            </Button>
+          </div>
+        </div>
 
         <div className="flex items-center gap-4">
           <Avatar className="h-8 w-8">

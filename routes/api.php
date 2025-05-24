@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TrainingController;
+use App\Http\Controllers\ChatController;
 
 
 Route::middleware('auth:sanctum')->group(function (){
@@ -31,6 +32,9 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::put('/training-topics/{trainingTopic}', [TrainingController::class, 'update'])->name('api.training.update');
 
     Route::get('/roles', [UserController::class, 'getRoles'])->name('api.roles.index');
+
+    Route::post('/tours/{tourId}/chat', [ChatController::class, 'sendMessage']);
+    Route::get('/tours/{tourId}/chat', [ChatController::class, 'getMessages']);
 
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');
