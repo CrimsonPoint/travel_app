@@ -105,6 +105,7 @@ class TourController extends Controller
                 'date_end' => $tour->date_end,
                 'checklist' => $tour->checklist,
                 'image_url' => $tour->image_url,
+                "route" =>$tour->route,
             ],
             'creator' => [
                 'name' => $tour->creator->name,
@@ -126,11 +127,13 @@ class TourController extends Controller
             'location' => 'nullable|string|max:255',
             'checklist' => 'nullable|json',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'route' => 'nullable|json',
         ]);
 
         $data = $validated;
         $data['creator_id'] = Auth::id();
         $data['checklist'] = $request->checklist ? json_decode($request->checklist, true) : [];
+        $data['route'] = $request->route ? json_decode($request->route, true) : [];
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('tours', 'public');
@@ -156,6 +159,7 @@ class TourController extends Controller
                 'date_end' => $tour->date_end,
                 'checklist' => $tour->checklist,
                 'image_url' => $tour->image_url,
+                'route' => $tour->route,
             ],
         ], 201);
     }
@@ -285,7 +289,7 @@ class TourController extends Controller
 
     public function delete(string $id)
     {
-        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => 'Доступ запрещён'], 403);
+        if (Auth::user()->getPermissionLvl() < 7) return response()->json(['message' => 'Доступ запрещён'], 403);
 
         $tour = Tour::findOrFail($id);
 

@@ -8,6 +8,7 @@ import { Calendar, MapPin, Users, Copy } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import axiosClient from "../axios-client.js";
 import { Toaster, toast } from "sonner";
+import YandexMap from "../components/YandexMap.jsx";
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -77,6 +78,10 @@ export default function TourDetail() {
             className="w-full h-96 object-cover rounded-lg shadow-md"
           />
         </div>
+
+        {tourData.tour.route && tourData.tour.route.start && tourData.tour.route.end && (
+          <YandexMap start={tourData.tour.route.start} end={tourData.tour.route.end} />
+        )}
 
         <div className="flex items-center gap-4">
           <Avatar className="h-8 w-8">

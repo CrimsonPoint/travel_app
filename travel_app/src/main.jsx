@@ -5,13 +5,11 @@ import App from './App.jsx'
 import {RouterProvider} from "react-router-dom";
 import router from './router';
 import {ContextProvider} from "./contexts/ContextProvider.jsx";
-import { Toaster, toast } from 'sonner'
+import { Toaster } from 'sonner'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <ContextProvider>
       <Toaster position="top-center" />
       <RouterProvider router={router}/>
     </ContextProvider>
-  </StrictMode>,
 )

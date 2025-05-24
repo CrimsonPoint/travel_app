@@ -21,6 +21,7 @@ export default function CreateTour() {
     location: "",
     max_participants: "",
     checklist: [],
+    route: { start: [0, 0], end: [0, 0] },
   });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -31,6 +32,20 @@ export default function CreateTour() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRouteChange = (e, point, coord) => {
+    const value = parseFloat(e.target.value);
+    if (isNaN(value)) return;
+    setFormData((prev) => ({
+      ...prev,
+      route: {
+        ...prev.route,
+        [point]: prev.route[point].map((val, index) =>
+          index === (coord === "lat" ? 0 : 1) ? value : val
+        ),
+      },
+    }));
   };
 
   const handleDifficultyChange = (value) => {
@@ -68,6 +83,20 @@ export default function CreateTour() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const { start, end } = formData.route;
+    if (
+      start[0] < -90 || start[0] > 90 || start[1] < -180 || start[1] > 180 ||
+      end[0] < -90 || end[0] > 90 || end[1] < -180 || end[1] > 180
+    ) {
+      toast.error("Некорректные координаты. Широта: [-90, 90], долгота: [-180, 180]");
+      return;
+    }
+    if (start[0] === 0 && start[1] === 0 || end[0] === 0 && end[1] === 0) {
+      toast.error("Пожалуйста, введите начальную и конечную точки маршрута");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -82,6 +111,7 @@ export default function CreateTour() {
     data.append("max_participants", Number(formData.max_participants));
     data.append("participants", 1);
     data.append("checklist", JSON.stringify(formData.checklist));
+    data.append("route", JSON.stringify(formData.route));
     if (image) {
       data.append("image", image);
     }
@@ -231,6 +261,62 @@ export default function CreateTour() {
               onChange={handleChange}
               placeholder="Введите местоположение"
             />
+          </div>
+
+          <div>
+            <Label className="mb-2">Начальная точка маршрута</Label>
+            <div className="flex gap-4">
+              <div>
+                <Label htmlFor="start_lat">Широта</Label>
+                <Input
+                  id="start_lat"
+                  type="number"
+                  step="any"
+                  value={formData.route.start[0]}
+                  onChange={(e) => handleRouteChange(e, "start", "lat")}
+                  placeholder="Широта (например, 55.7539)"
+                />
+              </div>
+              <div>
+                <Label htmlFor="start_lng">Долгота</Label>
+                <Input
+                  id="start_lng"
+                  type="number"
+                  step="any"
+                  value={formData.route.start[1]}
+                  onChange={(e) => handleRouteChange(e, "start", "lng")}
+                  placeholder="Долгота (например, 37.6208)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-2">Конечная точка маршрута</Label>
+            <div className="flex gap-4">
+              <div>
+                <Label htmlFor="end_lat">Широта</Label>
+                <Input
+                  id="end_lat"
+                  type="number"
+                  step="any"
+                  value={formData.route.end[0]}
+                  onChange={(e) => handleRouteChange(e, "end", "lat")}
+                  placeholder="Широта (например, 55.7512)"
+                />
+              </div>
+              <div>
+                <Label htmlFor="end_lng">Долгота</Label>
+                <Input
+                  id="end_lng"
+                  type="number"
+                  step="any"
+                  value={formData.route.end[1]}
+                  onChange={(e) => handleRouteChange(e, "end", "lng")}
+                  placeholder="Долгота (например, 37.6177)"
+                />
+              </div>
+            </div>
           </div>
 
           <div>

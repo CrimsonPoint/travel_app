@@ -28,12 +28,14 @@ class Tour extends Model
         'location',
         'checklist',
         'extra_fields',
-        'max_participants'
+        'max_participants',
+        'route'
     ];
 
     protected $casts = [
         'checklist' => 'array',
         'extra_fields' => 'array',
+        'route' => 'array',
     ];
 
     public function creator()
