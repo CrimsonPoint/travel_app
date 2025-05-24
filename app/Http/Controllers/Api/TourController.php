@@ -62,7 +62,7 @@ class TourController extends Controller
                     'distance' => $tour->distance,
                     'difficulty' => $tour->difficulty,
                     'description' => $tour->description,
-                    'participants' => $tour->participants,
+                    'participants' => $tour->participants()->count(),
                     'max_participants' => $tour->max_participants,
                     'location' => $tour->location,
                     'date_start' => $tour->date_start,
@@ -92,7 +92,20 @@ class TourController extends Controller
     {
         $tour = Tour::findOrFail($id);
         return [
-            'tour' => $tour,
+            'tour' =>  [
+                'id' => $tour->id,
+                'title' => $tour->title,
+                'distance' => $tour->distance,
+                'difficulty' => $tour->difficulty,
+                'description' => $tour->description,
+                'participants' => $tour->participants()->count(),
+                'max_participants' => $tour->max_participants,
+                'location' => $tour->location,
+                'date_start' => $tour->date_start,
+                'date_end' => $tour->date_end,
+                'checklist' => $tour->checklist,
+                'image_url' => $tour->image_url,
+            ],
             'creator' => [
                 'name' => $tour->creator->name,
             ],
@@ -117,7 +130,6 @@ class TourController extends Controller
 
         $data = $validated;
         $data['creator_id'] = Auth::id();
-        $data['participants'] = 1;
         $data['checklist'] = $request->checklist ? json_decode($request->checklist, true) : [];
 
         if ($request->hasFile('image')) {
@@ -137,7 +149,7 @@ class TourController extends Controller
                 'distance' => $tour->distance,
                 'difficulty' => $tour->difficulty,
                 'description' => $tour->description,
-                'participants' => $tour->participants,
+                'participants' => $tour->participants()->count(),
                 'max_participants' => $tour->max_participants,
                 'location' => $tour->location,
                 'date_start' => $tour->date_start,
@@ -159,9 +171,8 @@ class TourController extends Controller
             ], 400);
         }
 
-        if($tour->participants + 1 <= $tour->max_participants){
+        if($tour->participants()->count() + 1 <= $tour->max_participants){
             $tour->participants()->attach($user->id);
-            $tour->participants += 1;
             $tour->save();
 
             return response()->json([
@@ -261,7 +272,7 @@ class TourController extends Controller
             'description' => $tour->description,
             'difficulty' => $tour->difficulty,
             'distance' => $tour->distance,
-            'participants' => $tour->participants,
+            'participants' => $tour->participants()->count(),
             'max_participants' => $tour->max_participants,
             'date_start' => $tour->date_start,
             'date_end' => $tour->date_end,
