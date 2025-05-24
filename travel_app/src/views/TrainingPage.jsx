@@ -3,17 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
 import axiosClient from "../axios-client.js";
+import {toast} from "sonner";
 
 const TrainingPage = () => {
   const { topicId } = useParams();
   const navigate = useNavigate();
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // Загрузка темы с бэкенда
   useEffect(() => {
     axiosClient
       .get(`/training-topics/${topicId}`)
@@ -21,18 +19,13 @@ const TrainingPage = () => {
         setTopic(data);
         setLoading(false);
       })
-      .catch((err) => {
-        /*toast.error(err)*/
-        console.error('Ошибка загрузки темы:', error);
+      .catch(() => {
+        toast.error("Ошибка загрузки темы");
       });
   }, [topicId]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Загрузка...</div>;
-  }
-
-  if (error || !topic) {
-    return <div className="min-h-screen flex items-center justify-center">Тема не найдена</div>;
   }
 
   return (

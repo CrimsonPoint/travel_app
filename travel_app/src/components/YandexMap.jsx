@@ -33,12 +33,10 @@ export default function YandexMap({ start, end }) {
         );
 
         multiRoute.model.events.add("requestsuccess", () => {
-          console.log("Пешеходный маршрут успешно построен");
           mapInstanceRef.current.geoObjects.add(multiRoute);
         });
 
-        multiRoute.model.events.add("requestfail", (error) => {
-          console.error("Ошибка построения маршрута:", error);
+        multiRoute.model.events.add("requestfail", () => {
           toast.error("Не удалось построить пешеходный маршрут");
         });
       })
