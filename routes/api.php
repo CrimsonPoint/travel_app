@@ -25,10 +25,10 @@ Route::middleware('auth:sanctum')->group(function (){
 
     Route::get('/training-topics', [TrainingController::class, 'index'])->name('api.training.index');
     Route::get('/training-topics/{trainingTopic}', [TrainingController::class, 'show'])->name('api.training.show');
-    Route::get('/training-records', [TrainingController::class, 'getRecords'])->name('api.training.records');
     Route::post('/training-topics', [TrainingController::class, 'store'])->name('api.training.store');
-    Route::post('/training-user', [TrainingController::class, 'recordUser'])->name('api.training.record_user');
     Route::put('/training-topics/{trainingTopic}', [TrainingController::class, 'update'])->name('api.training.update');
+    Route::post('/training-user', [TrainingController::class, 'recordUser'])->name('api.training.recordUser');
+    Route::get('/training-records', [TrainingController::class, 'getRecords'])->name('api.training.getRecords');
 
     Route::get('/roles', [UserController::class, 'getRoles'])->name('api.roles.index');
 

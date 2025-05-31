@@ -145,7 +145,7 @@ export default function DefaultLayout() {
       <div className="flex-1 flex flex-col">
         <header className="bg-white shadow-sm p-4 flex justify-between items-center">
           <div className="text-lg font-semibold text-gray-800">
-            Панель управления
+            {/* Панель управления */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

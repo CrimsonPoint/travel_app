@@ -144,7 +144,7 @@ export default function TourFeed() {
         <div>
           <label className="text-sm font-medium mb-1.5 block">Локация</label>
           <div className="relative">
-            <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+            <MapPin className="absolute left-37 top-3 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Введите локацию"
               value={filters.location}

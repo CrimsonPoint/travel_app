@@ -27,6 +27,7 @@ const TrainingPage = () => {
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Загрузка...</div>;
   }
+  const baseUrl = "http://localhost:8876";
 
   return (
     <div className="min-h-screen bg-gray-100 py-12">
@@ -42,7 +43,7 @@ const TrainingPage = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col items-center">
                     <img
-                      src={slide.image}
+                      src={`${baseUrl}/${slide.image}`}
                       alt={slide.title}
                       className="w-full h-64 object-cover rounded-lg mb-4"
                     />

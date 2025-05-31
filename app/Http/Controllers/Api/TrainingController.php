@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class TrainingController extends Controller
 {
@@ -42,7 +44,7 @@ class TrainingController extends Controller
             'updated_at' => now(),
         ]);
 
-        return response()->json(['message' => 'Вы проши это обучение']);
+        return response()->json(['message' => 'Вы прошли это обучение']);
     }
 
     public function getRecords(Request $request)
@@ -59,31 +61,70 @@ class TrainingController extends Controller
 
     public function store(Request $request)
     {
+        $slides = is_string($request->slides) ? json_decode($request->slides, true) : $request->slides;
+        $request->merge(['slides' => $slides]);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'duration' => 'required|string|max:50',
-            'slides' => 'required|array',
-            'slides.*.image' => 'required|string',
-            'slides.*.title' => 'required|string',
-            'slides.*.description' => 'required|string',
+            'slides' => 'required|array|',
+            'slides.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+            'slides.*.title' => 'required|string|max:255',
+            'slides.*.description' => 'nullable|string',
         ]);
 
-        $topic = TrainingTopic::create($validated);
-        return response()->json($topic, 201);
+        $data = $validated;
+        $data['slides'] = array_map(function ($slide, $index) use ($request) {
+            if ($request->hasFile("slides.$index.image")) {
+                $path = $request->file("slides.$index.image")->store('training_slides', 'public');
+                $slide['image'] = Storage::url($path);
+            } else {
+                $slide['image'] = null;
+            }
+            return $slide;
+        }, $validated['slides'], array_keys($validated['slides']));
+
+        $topic = TrainingTopic::create($data);
+
+        return response()->json(['data' => $topic], 201);
     }
 
     public function update(Request $request, TrainingTopic $trainingTopic)
     {
-        $validated = $request->validate([
+        $data = $request->all();
+
+        if (is_string($request->slides)) {
+            $data['slides'] = json_decode($request->slides, true);
+        }
+
+        $validated = Validator::make($data, [
             'title' => 'required|string|max:255',
             'duration' => 'required|string|max:50',
             'slides' => 'required|array',
-            'slides.*.image' => 'required|string',
-            'slides.*.title' => 'required|string',
-            'slides.*.description' => 'required|string',
+            'slides.*.title' => 'required|string|max:255',
+            'slides.*.description' => 'nullable|string',
+        ])->validate();
+
+
+        $slides = [];
+        foreach ($validated['slides'] as $index => $slide) {
+            $slideData = $slide;
+
+            if ($request->hasFile("slide_images.{$index}")) {
+                $path = $request->file("slide_images.{$index}")->store('training_slides', 'public');
+                $slideData['image'] = Storage::url($path);
+            } elseif (isset($trainingTopic->slides[$index]['image'])) {
+                $slideData['image'] = $trainingTopic->slides[$index]['image'];
+            }
+
+            $slides[] = $slideData;
+        }
+
+        $trainingTopic->update([
+            'title' => $validated['title'],
+            'duration' => $validated['duration'],
+            'slides' => $slides
         ]);
 
-        $trainingTopic->update($validated);
-        return response()->json($trainingTopic);
+        return response()->json(['data' => $trainingTopic]);
     }
 }
