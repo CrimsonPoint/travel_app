@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\DirectMessageSent;
 use App\Http\Controllers\Controller;
+use App\Models\DirectMessage;
 use App\Models\Tour;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -187,5 +189,76 @@ class UserController extends Controller
             'user' => $user,
             'message' => 'Пользователь подтвержден',
         ]);
+    }
+
+    public function getChatMessages($userId)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->id == $userId) {
+            return response()->json(['messages' => []]);
+        }
+
+        $messages = DirectMessage::where(function ($query) use ($currentUser, $userId) {
+            $query->where('sender_id', $currentUser->id)
+                ->where('receiver_id', $userId);
+        })->orWhere(function ($query) use ($currentUser, $userId) {
+            $query->where('sender_id', $userId)
+                ->where('receiver_id', $currentUser->id);
+        })->orderBy('created_at')->get();
+
+        $formattedMessages = $messages->map(function ($message) use ($currentUser) {
+            return [
+                'id' => $message->id,
+                'sender_id' => $message->sender_id,
+                'receiver_id' => $message->receiver_id,
+                'user' => [
+                    'id' => $message->sender->id,
+                    'name' => $message->sender->name,
+                    'avatar' => $message->sender->avatar,
+                ],
+                'message' => $message->message,
+                'created_at' => $message->created_at->toISOString(),
+            ];
+        });
+
+        return response()->json(['messages' => $formattedMessages]);
+    }
+
+    public function sendChatMessage(Request $request, $userId)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $currentUser = Auth::user();
+        if ($currentUser->id == $userId) {
+            return response()->json(['error' => 'Нельзя отправлять сообщения себе'], 403);
+        }
+
+        $message = DirectMessage::create([
+            'sender_id' => $currentUser->id,
+            'receiver_id' => $userId,
+            'message' => $request->message,
+        ]);
+
+        $channelId = implode('-', [min($currentUser->id, $userId), max($currentUser->id, $userId)]);
+
+        $messageData = [
+            'id' => $message->id,
+            'sender_id' => $currentUser->id,
+            'receiver_id' => $userId,
+            'channel_id' => $channelId,
+            'user' => [
+                'id' => $currentUser->id,
+                'name' => $currentUser->name,
+                'avatar' => $currentUser->avatar,
+            ],
+            'message' => $message->message,
+            'created_at' => $message->created_at->toISOString(),
+        ];
+
+        broadcast(new DirectMessageSent($messageData));
+
+        return response()->json(['message' => 'Сообщение отправлено']);
     }
 }

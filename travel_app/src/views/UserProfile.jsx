@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { LogOut } from "lucide-react";
 import axiosClient from "../axios-client.js";
 import { Toaster, toast } from "sonner";
+import UserChat from "../components/UserChat.jsx";
 
 export default function UserProfile() {
   const navigate = useNavigate();
@@ -214,6 +215,8 @@ export default function UserProfile() {
             )}
           </CardContent>
         </Card>
+
+        <UserChat currentUser={currentUser} profileUser={profileUser} />
       </div>
     </div>
   );

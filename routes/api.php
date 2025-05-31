@@ -34,6 +34,8 @@ Route::middleware('auth:sanctum')->group(function (){
 
     Route::get('/tours/{tourId}/chat', [TourController::class, 'getChatMessages']);
     Route::post('/tours/{tourId}/chat', [TourController::class, 'sendChatMessage']);
+    Route::get('/user/{userId}/chat', [UserController::class, 'getChatMessages']);
+    Route::post('/user/{userId}/chat', [UserController::class, 'sendChatMessage']);
 
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');
