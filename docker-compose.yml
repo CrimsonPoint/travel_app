@@ -7,6 +7,8 @@ services:
         ports:
             - "8876:80"
         container_name: app_nginx
+        networks:
+            - backend
         depends_on:
             - app
 
@@ -17,6 +19,12 @@ services:
         volumes:
             - ./:/var/www
             - storage:/var/www/html/storage
+        ports:
+            - "8080:8080"
+        expose:
+            - "8080"
+        networks:
+            - backend
         depends_on:
             - db
         container_name: app_main
@@ -31,9 +39,13 @@ services:
             MYSQL_ROOT_PASSWORD: root
         ports:
             - 8101:3306
-            - 8080:8080
         command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
         container_name: app_db
+        networks:
+            - backend
 
+networks:
+    backend:
+        driver: bridge
 volumes:
     storage:
