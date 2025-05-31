@@ -32,6 +32,9 @@ Route::middleware('auth:sanctum')->group(function (){
 
     Route::get('/roles', [UserController::class, 'getRoles'])->name('api.roles.index');
 
+    Route::get('/tours/{tourId}/chat', [TourController::class, 'getChatMessages']);
+    Route::post('/tours/{tourId}/chat', [TourController::class, 'sendChatMessage']);
+
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');
     Route::get('/tour/{id}', [TourController::class, 'getTour'])->name('api.tours.get_tour');

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\Message;
 use App\Http\Controllers\Controller;
+use App\Models\ChatMessage;
 use App\Models\Tour;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -187,6 +189,68 @@ class TourController extends Controller
                 'message' => 'Места кончились',
             ], 400);
         }
+    }
+
+    public function getChatMessages($tourId)
+    {
+        $tour = Tour::findOrFail($tourId);
+
+        if (!$tour->participants()->where('user_id', Auth::id())->exists()) {
+            return response()->json(['error' => 'Вы не записаны на этот тур'], 403);
+        }
+
+        $messages = ChatMessage::where('tour_id', $tourId)
+            ->with('user')
+            ->orderBy('created_at')
+            ->get()
+            ->map(function ($message) {
+                return [
+                    'id' => $message->id,
+                    'user_id' => $message->user_id,
+                    'user' => [
+                        'id' => $message->user->id,
+                        'name' => $message->user->name,
+                        'avatar' => $message->user->avatar,
+                    ],
+                    'message' => $message->message,
+                    'created_at' => $message->created_at,
+                ];
+            });
+
+        return response()->json(['messages' => $messages]);
+    }
+
+    public function sendChatMessage(Request $request, $tourId)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $tour = Tour::findOrFail($tourId);
+        if (!$tour->participants()->where('user_id', Auth::id())->exists()) {
+            return response()->json(['error' => 'Вы не записаны на этот тур'], 403);
+        }
+
+        $message = ChatMessage::create([
+            'tour_id' => $tourId,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        event(new Message([
+            'id' => $message->id,
+            'user_id' => Auth::id(),
+            'tour_id' => $tourId,
+            'user' => [
+                'id' => Auth::user()->id,
+                'name' => Auth::user()->name,
+                'avatar' => Auth::user()->avatar,
+            ],
+            'message' => $message->message,
+            'created_at' => $message->created_at,
+        ]));
+
+        return response()->json(['message' => 'Сообщение отправлено']);
     }
 
     public function getUserTours($userId)

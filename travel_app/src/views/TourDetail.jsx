@@ -9,11 +9,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import axiosClient from "../axios-client.js";
 import { Toaster, toast } from "sonner";
 import YandexMap from "../components/YandexMap.jsx";
+import '../echo.js'
+import TourChat from "@/components/TourChat.jsx";
 
 export default function TourDetail() {
   const { id } = useParams();
   const [tourData, setTourData] = useState(null);
   const [isSignedUp, setIsSignedUp] = useState(false);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -26,15 +29,18 @@ export default function TourDetail() {
 
   useEffect(() => {
     setLoading(true);
-    axiosClient
-      .get(`/tour/${id}`)
-      .then(({ data }) => {
-        setTourData(data);
-        setIsSignedUp(data.user_is_participant);
+    Promise.all([
+      axiosClient.get(`/tour/${id}`),
+      axiosClient.get('/user')
+    ])
+      .then(([{ data: tourData }, { data: userData }]) => {
+        setTourData(tourData);
+        setIsSignedUp(tourData.user_is_participant);
+        setUser(userData);
         setLoading(false);
       })
       .catch((err) => {
-        setError("Не удалось загрузить данные тура");
+        setError("Не удалось загрузить данные");
         setLoading(false);
       });
   }, [id]);
@@ -81,6 +87,10 @@ export default function TourDetail() {
 
         {tourData.tour.route && tourData.tour.route.start && tourData.tour.route.end && (
           <YandexMap start={tourData.tour.route.start} end={tourData.tour.route.end} />
+        )}
+
+        { isSignedUp && (
+          <TourChat tourId={id} user={user} isSignedUp={isSignedUp} />
         )}
 
         <div className="flex items-center gap-4">
