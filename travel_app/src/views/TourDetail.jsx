@@ -42,7 +42,7 @@ export default function TourDetail() {
   const handleSignUp = () => {
     axiosClient
       .post(`/tours/${id}/signup`)
-      .then(({ data }) => {
+      .then(() => {
         toast.success("Вы успешно записались на тур");
         setIsSignedUp(true);
       })

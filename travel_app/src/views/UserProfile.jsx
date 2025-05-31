@@ -20,6 +20,11 @@ export default function UserProfile() {
   const [error, setError] = useState(null);
 
   const isOwnProfile = !userId || userId == currentUser.id;
+  const difficultyLabels = {
+    "1": "Легкая",
+    "2": "Средняя",
+    "3": "Сложная",
+  };
 
   useEffect(() => {
     if (!token) {
@@ -143,7 +148,7 @@ export default function UserProfile() {
                             {tour.title}
                           </a>
                         </TableCell>
-                        <TableCell>{tour.difficulty}</TableCell>
+                        <TableCell>{difficultyLabels[tour.difficulty]}</TableCell>
                         <TableCell>{tour.distance}</TableCell>
                         <TableCell>
                           {tour.participants} / {tour.max_participants || "∞"}
@@ -192,7 +197,7 @@ export default function UserProfile() {
                             {tour.title}
                           </a>
                         </TableCell>
-                        <TableCell>{tour.difficulty}</TableCell>
+                        <TableCell>{difficultyLabels[tour.difficulty]}</TableCell>
                         <TableCell>{tour.distance}</TableCell>
                         <TableCell>
                           {tour.participants} / {tour.max_participants || "∞"}

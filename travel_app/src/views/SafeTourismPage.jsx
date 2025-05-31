@@ -329,6 +329,7 @@ const SafeTourismPage = () => {
                       <Button
                         variant="outline"
                         className="mt-4 w-full"
+                        disabled={userRecords.includes(topic.id)}
                         onClick={(e) => {
                           e.preventDefault();
                           markAsCompleted(topic.id);
