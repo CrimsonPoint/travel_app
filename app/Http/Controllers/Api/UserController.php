@@ -65,16 +65,18 @@ class UserController extends Controller
         }
 
         if ($request->has('role') && $request->role) {
-            $query->whereHas('roles', function ($q) use ($request) {
-                $q->where('name', $request->role);
-            });
+            if ($request->role != 'all') {
+                $query->whereHas('roles', function ($q) use ($request) {
+                    $q->where('name', $request->role);
+                });
+            }
         }
 
-        if ($request->has('is_blocked')) {
+        if ($request->has('is_blocked') && $request->is_blocked != 'all') {
             $query->where('is_blocked', $request->boolean('is_blocked'));
         }
 
-        if ($request->has('is_verified')) {
+        if ($request->has('is_verified') && $request->is_verified && $request->is_verified != 'all') {
             $query->where('is_verified', $request->boolean('is_verified'));
         }
 

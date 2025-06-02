@@ -41,17 +41,16 @@ export default function UserManagement() {
 
   const fetchUsers = () => {
     setLoading(true);
-    const params = {
-      search: searchQuery,
-      role: roleFilter,
-      is_blocked: isBlockedFilter,
-      is_verified: isVerifiedFilter,
-      page,
-      per_page: 10,
-    };
 
     axiosClient
-      .post("/users", { params })
+      .post("/users", {
+        search: searchQuery,
+        role: roleFilter,
+        is_blocked: isBlockedFilter,
+        is_verified: isVerifiedFilter,
+        page,
+        per_page: 10,
+      })
       .then(({ data }) => {
         const normalizedUsers = (data.users || [])
           .filter(user => user && user.id && user.name)
@@ -198,7 +197,7 @@ export default function UserManagement() {
             </SelectContent>
           </Select>
           <Select value={isBlockedFilter} onValueChange={setIsBlockedFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-45">
               <SelectValue placeholder="Статус блокировки" />
             </SelectTrigger>
             <SelectContent>
@@ -208,7 +207,7 @@ export default function UserManagement() {
             </SelectContent>
           </Select>
           <Select value={isVerifiedFilter} onValueChange={setIsVerifiedFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-55">
               <SelectValue placeholder="Статус подтверждения" />
             </SelectTrigger>
             <SelectContent>
@@ -291,7 +290,7 @@ export default function UserManagement() {
       <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Изменить роли пользователя</DialogTitle>
+            <DialogTitle>Изменить роль пользователя</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             <RadioGroup

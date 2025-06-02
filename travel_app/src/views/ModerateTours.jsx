@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { flexRender, getCoreRowModel, useReactTable, getSortedRowModel,} from "@tanstack/react-table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit, CheckCheck } from "lucide-react";
 import axiosClient from "../axios-client.js";
-import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog";
-import {toast, Toaster} from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,} from "@/components/ui/alert-dialog";
+import { toast, Toaster } from "sonner";
+import {DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 
 export default function ModerateTours() {
   const navigate = useNavigate();
@@ -22,6 +24,20 @@ export default function ModerateTours() {
   const [open, setOpen] = useState(false);
   const [tourIdToDelete, setTourIdToDelete] = useState(null);
   const [checklistItem, setChecklistItem] = useState("");
+  const [columnVisibility, setColumnVisibility] = useState({
+    title: true,
+    description: true,
+    creator: true,
+    difficulty: true,
+    distance: true,
+    participants: true,
+    max_participants: true,
+    dates: true,
+    location: true,
+    image_url: true,
+    checklist: true,
+    actions: true,
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -34,18 +50,18 @@ export default function ModerateTours() {
         } else {
           setIsAdmin(true);
           axiosClient
-            .post("/tours", {getAllStatuses: true})
+            .post("/tours", { getAllStatuses: true })
             .then(({ data }) => {
               setTours(data.data);
               setLoading(false);
             })
-            .catch((err) => {
+            .catch(() => {
               toast.error("Не удалось загрузить туры");
               setLoading(false);
             });
         }
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("Не удалось проверить права доступа");
         setLoading(false);
       });
@@ -58,14 +74,14 @@ export default function ModerateTours() {
 
   const handleApprove = (id) => {
     axiosClient
-      .patch(`/tour/${id}/status`, {status: 2})
+      .patch(`/tour/${id}/status`, { status: 2 })
       .then(() => {
         toast.success("Статус обновлен");
       })
       .catch(() => {
         toast.error("Что-то пошло не так");
       });
-  }
+  };
 
   const confirmDelete = () => {
     if (!tourIdToDelete) return;
@@ -123,77 +139,163 @@ export default function ModerateTours() {
       });
   };
 
+  const columns = [
+    {
+      accessorKey: "title",
+      header: "Название",
+      cell: ({ row }) => row.original.tour?.title || "Нет названия",
+    },
+    {
+      accessorKey: "description",
+      header: "Описание",
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate">{row.original.tour.description}</div>
+      ),
+    },
+    {
+      accessorKey: "creator",
+      header: "Создатель",
+      cell: ({ row }) => row.original.tour.creator?.name || "Неизвестно",
+    },
+    {
+      accessorKey: "difficulty",
+      header: "Сложность",
+      cell: ({ row }) => row.original.tour.difficulty,
+    },
+    {
+      accessorKey: "distance",
+      header: "Дистанция",
+      cell: ({ row }) => row.original.tour.distance,
+    },
+    {
+      accessorKey: "participants",
+      header: "Участники",
+      cell: ({ row }) => row.original.tour.participants,
+    },
+    {
+      accessorKey: "max_participants",
+      header: "Макс. участников",
+      cell: ({ row }) => row.original.tour.max_participants || "∞",
+    },
+    {
+      accessorKey: "dates",
+      header: "Даты",
+      cell: ({ row }) =>
+        `${new Date(row.original.tour.date_start).toLocaleDateString()} - ${new Date(
+          row.original.tour.date_end
+        ).toLocaleDateString()}`,
+    },
+    {
+      accessorKey: "location",
+      header: "Местоположение",
+      cell: ({ row }) => row.original.tour.location,
+    },
+    {
+      accessorKey: "image_url",
+      header: "URL изображения",
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate">{row.original.tour.image_url}</div>
+      ),
+    },
+    {
+      accessorKey: "checklist",
+      header: "Чеклист",
+      cell: ({ row }) => (
+        <div className="max-w-[200px] truncate">
+          {row.original.tour.checklist?.join(", ") || "Пусто"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "actions",
+      header: "Действия",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditTour(row.original.tour)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => handleDelete(row.original.tour.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button
+            {...(row.original.tour.status > 0 ? { disabled: true } : {})}
+            variant="outline"
+            size="sm"
+            onClick={() => handleApprove(row.original.tour.id)}
+          >
+            <CheckCheck className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const table = useReactTable({
+    data: tours,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+  });
+
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
   if (!isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900">Модерирование туров</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Модерирование туров</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">Выбрать столбцы</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {table.getAllColumns().map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.columnDef.header}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        <div className="overflow-x-auto mt-10">
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[150px]">Название</TableHead>
-                <TableHead className="min-w-[200px]">Описание</TableHead>
-                <TableHead className="min-w-[120px]">Создатель</TableHead>
-                <TableHead className="min-w-[100px]">Сложность</TableHead>
-                <TableHead className="min-w-[100px]">Дистанция</TableHead>
-                <TableHead className="min-w-[120px]">Участники</TableHead>
-                <TableHead className="min-w-[150px]">Макс. участников</TableHead>
-                <TableHead className="min-w-[200px]">Даты</TableHead>
-                <TableHead className="min-w-[150px]">Местоположение</TableHead>
-                <TableHead className="min-w-[200px]">URL изображения</TableHead>
-                <TableHead className="min-w-[200px]">Чеклист</TableHead>
-                <TableHead className="min-w-[120px]">Действия</TableHead>
-              </TableRow>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
             </TableHeader>
             <TableBody>
-              {tours.map((data) => (
-                <TableRow key={data.tour.id}>
-                  <TableCell>{data?.tour?.title || "Нет названия"}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{data.tour.description}</TableCell>
-                  <TableCell>{data.tour.creator?.name || "Неизвестно"}</TableCell>
-                  <TableCell>{data.tour.difficulty}</TableCell>
-                  <TableCell>{data.tour.distance}</TableCell>
-                  <TableCell>{data.tour.participants}</TableCell>
-                  <TableCell>{data.tour.max_participants || "∞"}</TableCell>
-                  <TableCell>
-                    {new Date(data.tour.date_start).toLocaleDateString()} -{" "}
-                    {new Date(data.tour.date_end).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{data.tour.location}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{data.tour.image_url}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {data.tour.checklist?.join(", ") || "Пусто"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditTour(data.tour)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(data.tour.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        {...(data.tour.status > 0 ? {disabled: true} : {})}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleApprove(data.tour.id)}
-                      >
-                        <CheckCheck className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>
@@ -374,6 +476,7 @@ export default function ModerateTours() {
           </Dialog>
         )}
       </div>
+      <Toaster />
     </div>
   );
 }

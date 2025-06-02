@@ -35,7 +35,7 @@ export default function Users() {
   return (
     <div className="min-h-screen bg-gray-100 py-12">
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center">Все пользователи</h1>
+        <h1 className="text-3xl font-bold text-center">Пользователи</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {users.map((user) => (
             <Card key={user.id} className="hover:shadow-lg transition-shadow">

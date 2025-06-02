@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\Message;
+use App\Events\TourMessage;
 use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
 use App\Models\Tour;
@@ -237,7 +237,7 @@ class TourController extends Controller
             'message' => $request->message,
         ]);
 
-        event(new Message([
+        event(new TourMessage([
             'id' => $message->id,
             'user_id' => Auth::id(),
             'tour_id' => $tourId,
