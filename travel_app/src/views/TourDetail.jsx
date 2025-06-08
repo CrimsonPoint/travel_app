@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Copy } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar, MapPin, Users, Copy, BookOpen } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import axiosClient from "../axios-client.js";
 import { Toaster, toast } from "sonner";
@@ -39,7 +40,7 @@ export default function TourDetail() {
         setUser(userData);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Не удалось загрузить данные");
         setLoading(false);
       });
@@ -135,6 +136,35 @@ export default function TourDetail() {
             <MapPin className="h-5 w-5 text-gray-600" />
             <span>{tourData.tour.location || "Местоположение не указано"}</span>
           </div>
+          { tourData.tour.topics.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer hover:text-blue-600">
+                    <BookOpen className="h-5 w-5" />
+                    <span>Требуемое обучение</span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Необходимые темы обучения</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {tourData.tour.topics.map((topic) => (
+                        <li key={topic.id}>
+                          <a
+                            href={`/save_tourism/${topic.id}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {topic.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
         </div>
 
         <Accordion type="single" collapsible className="w-full">

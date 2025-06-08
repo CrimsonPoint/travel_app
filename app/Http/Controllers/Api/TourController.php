@@ -6,6 +6,7 @@ use App\Events\TourMessage;
 use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
 use App\Models\Tour;
+use App\Models\TrainingTopic;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,8 @@ class TourController extends Controller
                     'checklist' => $tour->checklist,
                     'imageUrl' => $tour->image_url,
                     'status' => $tour->status,
+                    'extra_fields' => $tour->extra_fields,
+                    'topics' => $tour->extra_fields ? TrainingTopic::findOrFail($tour->extra_fields['topics']) : [],
                 ],
                 'creator' => [
                     'name' => $tour->creator->name,
@@ -108,6 +111,8 @@ class TourController extends Controller
                 'checklist' => $tour->checklist,
                 'image_url' => $tour->image_url,
                 "route" =>$tour->route,
+                'extra_fields' => $tour->extra_fields,
+                'topics' => $tour->extra_fields ? TrainingTopic::findOrFail($tour->extra_fields['topics']) : [],
             ],
             'creator' => [
                 'name' => $tour->creator->name,
@@ -175,6 +180,28 @@ class TourController extends Controller
             return response()->json([
                 'message' => 'Вы уже записаны на этот тур',
             ], 400);
+        }
+
+        if ($tour->extra_fields['topics']) {
+            $requiredTopicIds = $tour->extra_fields['topics'];
+            $requiredCount = count($requiredTopicIds);
+
+            $completedTopicIds = DB::table('training_user')
+                ->where('user_id', $user->id)
+                ->whereIn('training_id', $requiredTopicIds)
+                ->pluck('training_id')
+                ->toArray();
+
+            $completedCount = count($completedTopicIds);
+
+            $allTopicsCompleted = $requiredCount === $completedCount &&
+                count(array_intersect($requiredTopicIds, $completedTopicIds)) === $requiredCount;
+
+            if (!$allTopicsCompleted) {
+                return response()->json([
+                    'message' => 'Вам нужно пройти обучение',
+                ], 400);
+            }
         }
 
         if($tour->participants()->count() + 1 <= $tour->max_participants){

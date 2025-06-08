@@ -263,4 +263,18 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Сообщение отправлено']);
     }
+
+    public function getUserTrainingTopics($userId)
+    {
+        if (!$userId) {
+            $userId = Auth::id();
+        }
+        $data = DB::table('training_user')
+            ->join('training_topics', 'training_user.training_id', '=', 'training_topics.id')
+            ->where('training_user.user_id', $userId)
+            ->get()
+            ->toArray();
+
+        return response()->json($data);
+    }
 }

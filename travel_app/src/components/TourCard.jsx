@@ -1,36 +1,38 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Users } from "lucide-react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MapPin, Users, BookOpen } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function TourCard({
-        id,
-        title = "Без названия",
-        imageUrl = null,
-        creatorName = "Неизвестный",
-        creatorAvatar = null,
-        difficulty = "Средняя",
-        distance = "0",
-        participants = 0,
-        maxParticipants = 0,
-        onSignUp = () => {},
-        isParticipants = false,
-    }) {
-  const [isSignedUp, setIsSignedUp] = useState(isParticipants)
-  const [tourParticipants, setTourParticipants] = useState(participants)
+                                   id,
+                                   title = "Без названия",
+                                   imageUrl = null,
+                                   creatorName = "Неизвестный",
+                                   creatorAvatar = null,
+                                   difficulty = "Средняя",
+                                   distance = "0",
+                                   participants = 0,
+                                   maxParticipants = 0,
+                                   requiredTrainingTopics = [],
+                                   onSignUp = () => {},
+                                   isParticipants = false,
+                                 }) {
+  const [isSignedUp, setIsSignedUp] = useState(isParticipants);
+  const [tourParticipants, setTourParticipants] = useState(participants);
   const baseUrl = "http://localhost:8876";
 
   const handleSignUp = () => {
     onSignUp()
       .then(() => {
-        setIsSignedUp(true)
-        setTourParticipants(tourParticipants + 1)
+        setIsSignedUp(true);
+        setTourParticipants(tourParticipants + 1);
       })
-      .catch(() => {})
-  }
+      .catch(() => {});
+  };
 
   const difficulties = [
     {
@@ -96,6 +98,33 @@ export default function TourCard({
               <MapPin className="h-3.5 w-3.5" />
               <span>{distance} км</span>
             </div>
+            {requiredTrainingTopics.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2 cursor-pointer hover:text-blue-600">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span>Требуемое обучение</span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Необходимые темы обучения</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {requiredTrainingTopics.map((topic) => (
+                        <li key={topic.id}>
+                          <Link
+                            to={`/save_tourism/${topic.id}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {topic.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
           <div className="flex flex-col items-end">
             <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
@@ -119,7 +148,7 @@ export default function TourCard({
               {tourParticipants} / {maxParticipants}
             </span>
           </div>
-          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${isFull ? "bg-red-500" : "bg-emerald-500"}`}
               style={{ width: `${Math.min(participantsPercentage, 100)}%` }}

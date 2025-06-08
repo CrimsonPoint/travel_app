@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');
     Route::post('/users', [UserController::class, 'index'])->name('api.users.index');
     Route::get('/users', [UserController::class, 'getAll'])->name('api.users.get_all');
+    Route::get('/user/topics/{id}', [UserController::class, 'getUserTrainingTopics'])->name('api.users.get_topics');
     Route::post('/user', [UserController::class, 'store'])->name('api.user.store');
     Route::patch('/users/{id}/roles', [UserController::class, 'updateRoles'])->name('api.users.roles');
     Route::patch('/users/{id}/block', [UserController::class, 'toggleBlock'])->name('api.users.block');

@@ -274,6 +274,7 @@ export default function TourFeed() {
                     participants={data.tour.participants}
                     onSignUp={() => handleSignUp(data.tour.id)}
                     isParticipants={data.user_is_participant}
+                    requiredTrainingTopics={data.tour.topics}
                     maxParticipants={data.tour.max_participants}
                   />
                 ))}

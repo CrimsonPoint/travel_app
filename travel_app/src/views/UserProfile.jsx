@@ -17,6 +17,7 @@ export default function UserProfile() {
   const [profileUser, setProfileUser] = useState(null);
   const [tours, setTours] = useState([]);
   const [participations, setParticipations] = useState([]);
+  const [completedTopics, setCompletedTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -54,8 +55,11 @@ export default function UserProfile() {
 
         const { data: toursData } = await axiosClient.get(`/users/${targetUser.id}/tours`);
         const { data: participationsTours } = await axiosClient.get(`/users/${targetUser.id}/tour-participations`);
+        const { data: completedRecords } = await axiosClient.get(`/user/topics/${targetUser.id}`);
+
         setTours(toursData.tours || toursData);
-        setParticipations(participationsTours.tours)
+        setParticipations(participationsTours.tours);
+        setCompletedTopics(completedRecords || []);
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || "Не удалось загрузить данные");
@@ -206,6 +210,49 @@ export default function UserProfile() {
                         <TableCell>
                           {new Date(tour.date_start).toLocaleDateString()} -{" "}
                           {new Date(tour.date_end).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {isOwnProfile ? "Мои пройденные темы" : "Пройденные темы пользователя"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {completedTopics.length === 0 ? (
+              <p className="text-gray-600">
+                {isOwnProfile ? "Вы ещё не прошли ни одну тему." : "Этот пользователь не прошел ни одну тему."}
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Название темы</TableHead>
+                      <TableHead>Дата завершения</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {completedTopics.map((topic) => (
+                      <TableRow key={topic.training_id}>
+                        <TableCell>
+                          <a
+                            href={`/save_tourism/${topic.training_id}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {topic.title}
+                          </a>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(topic.created_at).toLocaleDateString()}
                         </TableCell>
                       </TableRow>
                     ))}
