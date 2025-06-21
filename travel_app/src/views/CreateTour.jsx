@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, setHours, setMinutes } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Calendar as CalendarIcon } from "lucide-react";
 import axiosClient from "../axios-client.js";
 import { toast } from "sonner";
 
@@ -16,22 +22,56 @@ export default function CreateTour() {
     difficulty: "2",
     distance: "",
     description: "",
-    date_start: "",
-    date_end: "",
+    date_start: null,
+    date_end: null,
     location: "",
     max_participants: "",
     checklist: [],
     route: { start: [0, 0], end: [0, 0] },
+    extra_fields: { topics: [] },
   });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [checklistItem, setChecklistItem] = useState("");
+  const [trainingTopics, setTrainingTopics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+
+  useEffect(() => {
+    axiosClient
+      .get('/training-topics')
+      .then(({ data }) => {
+        setTrainingTopics(data || []);
+      })
+      .catch(() => {
+        toast.error("Не удалось загрузить темы обучения");
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (name, date) => {
+    let time = name === "date_start" ? startTime : endTime;
+    let [hours, minutes] = time ? time.split(":") : [0, 0];
+    date = setHours(setMinutes(date, parseInt(minutes)), parseInt(hours));
+    setFormData((prev) => ({ ...prev, [name]: date }));
+  };
+
+  const handleTimeChange = (name, value) => {
+    const [hours, minutes] = value.split(":");
+    setFormData((prev) => {
+      const dateField = name === "startTime" ? "date_start" : "date_end";
+      let date = prev[dateField] || new Date();
+      date = setHours(setMinutes(date, parseInt(minutes)), parseInt(hours));
+      return { ...prev, [dateField]: date };
+    });
+    if (name === "startTime") setStartTime(value);
+    else setEndTime(value);
   };
 
   const handleRouteChange = (e, point, coord) => {
@@ -81,6 +121,18 @@ export default function CreateTour() {
     }));
   };
 
+  const handleTopicChange = (topicId) => {
+    setFormData((prev) => {
+      const topics = prev.extra_fields.topics.includes(topicId)
+        ? prev.extra_fields.topics.filter((id) => id !== topicId)
+        : [...prev.extra_fields.topics, topicId];
+      return {
+        ...prev,
+        extra_fields: { ...prev.extra_fields, topics }
+      };
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -96,6 +148,14 @@ export default function CreateTour() {
       toast.error("Пожалуйста, введите начальную и конечную точки маршрута");
       return;
     }
+    if (!formData.date_start || !formData.date_end) {
+      toast.error("Пожалуйста, выберите даты и время начала и окончания");
+      return;
+    }
+    if (formData.date_end < formData.date_start) {
+      toast.error("Дата и время окончания не могут быть раньше даты и времени начала");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -105,13 +165,14 @@ export default function CreateTour() {
     data.append("difficulty", formData.difficulty);
     data.append("distance", Number(formData.distance));
     data.append("description", formData.description);
-    data.append("date_start", formData.date_start);
-    data.append("date_end", formData.date_end);
+    data.append("date_start", format(formData.date_start, "yyyy-MM-dd'T'HH:mm:ss"));
+    data.append("date_end", format(formData.date_end, "yyyy-MM-dd'T'HH:mm:ss"));
     data.append("location", formData.location);
     data.append("max_participants", Number(formData.max_participants));
     data.append("participants", 1);
     data.append("checklist", JSON.stringify(formData.checklist));
     data.append("route", JSON.stringify(formData.route));
+    data.append("extra_fields", JSON.stringify(formData.extra_fields));
     if (image) {
       data.append("image", image);
     }
@@ -223,31 +284,75 @@ export default function CreateTour() {
           </div>
 
           <div>
-            <Label className="mb-2" htmlFor="date_start">
-              Дата начала
-            </Label>
-            <Input
-              id="date_start"
-              name="date_start"
-              type="datetime-local"
-              value={formData.date_start}
-              onChange={handleChange}
-              required
-            />
+            <Label className="mb-2">Дата и время начала</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal ${
+                    !formData.date_start && "text-muted-foreground"
+                  }`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.date_start
+                    ? format(formData.date_start, "PPP", { locale: ru })
+                    : <span>Выберите дату и время</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.date_start}
+                  onSelect={(date) => handleDateChange("date_start", date)}
+                  initialFocus
+                  locale={ru}
+                />
+                <div className="p-3 border-t">
+                  <Input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => handleTimeChange("startTime", e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>
-            <Label className="mb-2" htmlFor="date_end">
-              Дата окончания
-            </Label>
-            <Input
-              id="date_end"
-              name="date_end"
-              type="datetime-local"
-              value={formData.date_end}
-              onChange={handleChange}
-              required
-            />
+            <Label className="mb-2">Дата и время окончания</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal ${
+                    !formData.date_end && "text-muted-foreground"
+                  }`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.date_end
+                    ? format(formData.date_end, "PPP", { locale: ru })
+                    : <span>Выберите дату и время</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.date_end}
+                  onSelect={(date) => handleDateChange("date_end", date)}
+                  initialFocus
+                  locale={ru}
+                />
+                <div className="p-3 border-t">
+                  <Input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => handleTimeChange("endTime", e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>
@@ -332,6 +437,28 @@ export default function CreateTour() {
               placeholder="Введите максимальное число участников"
               min="2"
             />
+          </div>
+
+          <div>
+            <Label className="mb-2">Темы обучения</Label>
+            <div className="mt-2 space-y-2">
+              {trainingTopics.length > 0 ? (
+                trainingTopics.map((topic) => (
+                  <div key={topic.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`topic-${topic.id}`}
+                      checked={formData.extra_fields.topics.includes(topic.id)}
+                      onCheckedChange={() => handleTopicChange(topic.id)}
+                    />
+                    <Label htmlFor={`topic-${topic.id}`} className="cursor-pointer">
+                      {topic.title}
+                    </Label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600">Темы обучения не найдены</p>
+              )}
+            </div>
           </div>
 
           <div>
