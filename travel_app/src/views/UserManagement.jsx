@@ -8,8 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label"
+import { useStateContext  } from '../contexts/ContextProvider.jsx';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {Lock, Unlock, CheckCircle, Search} from "lucide-react";
+import ForbiddenPage from "./ForbiddenPage.jsx";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -21,6 +23,7 @@ export default function UserManagement() {
   const [isVerifiedFilter, setIsVerifiedFilter] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const { user, canEdit } = useStateContext();
   const [error, setError] = useState(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -33,6 +36,8 @@ export default function UserManagement() {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [tempRoles, setTempRoles] = useState([]);
+
+  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
 
   useEffect(() => {
     fetchUsers();

@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Menu, Users, LayoutDashboard, House, MapPinPlusInside, SquareChartGantt, Leaf, UserCog } from "lucide-react";
 
 export default function DefaultLayout() {
-  const { user, token, setUser, setToken } = useStateContext();
+  const { user, token, setUser, setToken, canEdit, setCanEdit } = useStateContext();
   const navigate = useNavigate();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -33,6 +33,9 @@ export default function DefaultLayout() {
   useEffect(() => {
     axiosClient.get("/user").then(({ data }) => {
       setUser(data);
+    });
+    axiosClient.get("/can_edit").then(({ data }) => {
+      setCanEdit(Boolean(data));
     });
   }, []);
 
@@ -62,7 +65,7 @@ export default function DefaultLayout() {
       link : "dashboard",
       title : "Панель управления",
       icon : <LayoutDashboard className="h-5 w-5" />,
-      access : true
+      access : canEdit
     },
     {
       link : "users",
@@ -74,19 +77,19 @@ export default function DefaultLayout() {
       link : "moderate_users",
       title : "Управление пользователями",
       icon : <UserCog className="h-5 w-5" />,
-      access : true
+      access : canEdit
     },
     {
       link : "create_tour",
       title : "Создать тур",
       icon : <MapPinPlusInside className="h-5 w-5" />,
-      access : true
+      access : user.is_verified
     },
     {
       link : "moderate_tours",
       title : "Модерирование туров",
       icon : <SquareChartGantt className="h-5 w-5" />,
-      access : true
+      access : canEdit
     },
     {
       link : "save_tourism",

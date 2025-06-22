@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useStateContext  } from '../contexts/ContextProvider.jsx';
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,11 @@ import axiosClient from "../axios-client.js";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,} from "@/components/ui/alert-dialog";
 import { toast, Toaster } from "sonner";
 import {DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import ForbiddenPage from "./ForbiddenPage.jsx";
 
 export default function ModerateTours() {
   const navigate = useNavigate();
+  const { user, canEdit } = useStateContext();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -38,6 +41,8 @@ export default function ModerateTours() {
     checklist: true,
     actions: true,
   });
+
+  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
 
   useEffect(() => {
     setLoading(true);
@@ -250,7 +255,6 @@ export default function ModerateTours() {
   });
 
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
-  if (!isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

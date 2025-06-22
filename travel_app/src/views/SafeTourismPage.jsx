@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2, Clock, Pencil, Trash2 } from 'lucide-react';
+import { useStateContext  } from '../contexts/ContextProvider.jsx';
 import axiosClient from "../axios-client.js";
 import { toast } from "sonner";
 
@@ -21,6 +22,7 @@ const SafeTourismPage = () => {
   });
   const [previews, setPreviews] = useState([]);
   const baseUrl = "http://localhost:8876";
+  const { user, canEdit } = useStateContext();
 
   useEffect(() => {
     axiosClient
@@ -218,7 +220,7 @@ const SafeTourismPage = () => {
           <h1 className="text-3xl font-bold">Обучение безопасному туризму</h1>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => openDialog()}>Создать тему</Button>
+              {(canEdit) && (<Button onClick={() => openDialog()}>Создать тему</Button>)}
             </DialogTrigger>
             <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
@@ -340,13 +342,15 @@ const SafeTourismPage = () => {
                     </CardContent>
                   </Card>
                 </Link>
-                <Button
-                  variant="ghost"
-                  className="absolute top-2 right-2"
-                  onClick={() => openDialog(topic)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                {canEdit && (
+                  <Button
+                    variant="ghost"
+                    className="absolute top-2 right-2"
+                    onClick={() => openDialog(topic)}
+                  >
+                    <Pencil className="h-4 w-4"/>
+                  </Button>
+                )}
               </div>
             ))}
         </div>

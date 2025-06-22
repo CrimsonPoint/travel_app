@@ -15,6 +15,10 @@ Route::middleware('auth:sanctum')->group(function (){
         return $request->user();
     });
 
+    Route::get('/can_edit', function (Request $request) {
+        return $request->user()->canEdit();
+    });
+
     Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');
     Route::post('/users', [UserController::class, 'index'])->name('api.users.index');
     Route::get('/users', [UserController::class, 'getAll'])->name('api.users.get_all');

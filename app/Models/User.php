@@ -13,6 +13,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    const ADMIN_LVL = 10;
+    const MODERATOR_LVL = 7;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -106,5 +109,10 @@ class User extends Authenticatable
     public function getRole()
     {
         return $this->roles->first()?->makeHidden('pivot');
+    }
+
+    public function canEdit()
+    {
+        return $this->getPermissionLvl() >= self::MODERATOR_LVL;
     }
 }
