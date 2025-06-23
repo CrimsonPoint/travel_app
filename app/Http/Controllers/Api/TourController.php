@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\NotificationCreated;
 use App\Events\TourMessage;
 use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
+use App\Models\CustomNotification;
 use App\Models\Tour;
 use App\Models\TrainingTopic;
 use App\Models\User;
@@ -208,6 +210,15 @@ class TourController extends Controller
             $tour->participants()->attach($user->id);
             $tour->save();
 
+            $notification = CustomNotification::create([
+                'user_id' => $user->id,
+                'message' => "Вы записались на тур: " . $tour->title,
+                'type' => 'tour_signup',
+                'data' => ['tour_id' => $tour->id],
+            ]);
+
+            event(new NotificationCreated($notification));
+
             return response()->json([
                 'message' => 'Вы успешно записаны на тур',
             ]);
@@ -303,7 +314,7 @@ class TourController extends Controller
     {
         $tour = Tour::findOrFail($id);
 
-        if ($tour->creator_id !== Auth::id()) {
+        if ($tour->creator_id !== Auth::id() && !Auth::user()->canEdit()) {
             return response()->json([
                 'message' => 'У вас нет прав для изменения статуса этого тура',
             ], 403);

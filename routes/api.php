@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TrainingController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::middleware('auth:sanctum')->group(function (){
@@ -17,6 +18,12 @@ Route::middleware('auth:sanctum')->group(function (){
 
     Route::get('/can_edit', function (Request $request) {
         return $request->user()->canEdit();
+    });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::delete('/notifications/{id}', [NotificationController::class, 'delete']);
     });
 
     Route::get('/user/{id}', [UserController::class, 'getUser'])->name('api.user.get_user');

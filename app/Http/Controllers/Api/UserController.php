@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\DirectMessageSent;
+use App\Events\NotificationCreated;
 use App\Http\Controllers\Controller;
+use App\Models\CustomNotification;
 use App\Models\DirectMessage;
 use App\Models\Tour;
 use App\Models\User;
@@ -186,6 +188,15 @@ class UserController extends Controller
         $user->is_verified = true;
         $user->email_verified_at = now();
         $user->save();
+
+        $notification = CustomNotification::create([
+            'user_id' => $user->id,
+            'message' => "Вам подтвердили профиль",
+            'type' => 'tour_signup',
+            'data' => [],
+        ]);
+
+        event(new NotificationCreated($notification));
 
         return response()->json([
             'user' => $user,
