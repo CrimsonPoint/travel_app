@@ -8,6 +8,7 @@ use App\Http\Requests\SignupRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -53,6 +54,12 @@ class AuthController extends Controller
             "name" => $data["name"],
             "email" => $data["email"],
             "password" => bcrypt($data["password"]),
+        ]);
+
+        $role_id = DB::table('roles')->where('name' , '=', 'user')->first()->id;
+        DB::table('role_user')->insert([
+            'role_id' => $role_id,
+            'user_id' => $user->id,
         ]);
 
         /** @var User $user */
