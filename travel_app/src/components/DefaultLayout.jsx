@@ -62,12 +62,6 @@ export default function DefaultLayout() {
       access : true
     },
     {
-      link : "dashboard",
-      title : "Панель управления",
-      icon : <LayoutDashboard className="h-5 w-5" />,
-      access : canEdit
-    },
-    {
       link : "users",
       title : "Пользователи",
       icon : <Users className="h-5 w-5" />,

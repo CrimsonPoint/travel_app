@@ -21,7 +21,7 @@ class TourController extends Controller
     {
         $query = Tour::query();
 
-        if ($request->missing('getAllStatuses')) {
+        if ($request->missing('getAllStatuses') || !$request->user()->canEdit()) {
             $query->whereIn('status', Tour::getActiveStatuses());
         }
 

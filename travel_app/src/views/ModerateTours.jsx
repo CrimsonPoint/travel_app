@@ -42,32 +42,17 @@ export default function ModerateTours() {
     actions: true,
   });
 
-  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
-
   useEffect(() => {
     setLoading(true);
     axiosClient
-      .get("/user")
+      .post("/tours", { getAllStatuses: true })
       .then(({ data }) => {
-        if (data.is_admin) {
-          toast.error("Доступ запрещён");
-          navigate("/");
-        } else {
-          setIsAdmin(true);
-          axiosClient
-            .post("/tours", { getAllStatuses: true })
-            .then(({ data }) => {
-              setTours(data.data);
-              setLoading(false);
-            })
-            .catch(() => {
-              toast.error("Не удалось загрузить туры");
-              setLoading(false);
-            });
-        }
+        setTours(data.data);
+        setTrainingTopics(data.data.topics || []);
+        setLoading(false);
       })
       .catch(() => {
-        toast.error("Не удалось проверить права доступа");
+        toast.error("Не удалось загрузить туры");
         setLoading(false);
       });
   }, [navigate]);
@@ -255,6 +240,7 @@ export default function ModerateTours() {
   });
 
   if (loading) return <div className="min-h-screen bg-gray-100 p-6">Загрузка...</div>;
+  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

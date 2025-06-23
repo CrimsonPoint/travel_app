@@ -37,8 +37,6 @@ export default function UserManagement() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [tempRoles, setTempRoles] = useState([]);
 
-  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
-
   useEffect(() => {
     fetchUsers();
     fetchRoles();
@@ -164,6 +162,7 @@ export default function UserManagement() {
     setRoleDialogOpen(true);
   };
 
+  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
   if (loading) return <div className="p-6">Загрузка...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
 

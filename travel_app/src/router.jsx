@@ -5,7 +5,6 @@ import Users from "./views/Users.jsx";
 import NotFoundPage from "./views/NotFoundPage.jsx";
 import DefaultLayout from "./components/DefaultLayout.jsx";
 import GuestLayout from "./components/GuestLayout.jsx";
-import Dashboard from "./views/Dashboard.jsx";
 import Home from "./views/Home.jsx";
 import CreateTour from "./views/CreateTour.jsx";
 import TourDetailPage from "./views/TourDetailPage.jsx";
@@ -27,10 +26,6 @@ const router = createBrowserRouter([
       {
         path: "/users",
         element: <Users/>
-      },
-      {
-        path: "/dashboard",
-        element: <Dashboard/>
       },
       {
         path: "/home",
