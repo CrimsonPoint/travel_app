@@ -12,6 +12,7 @@ import { Toaster, toast } from "sonner";
 import YandexMap from "../components/YandexMap.jsx";
 import '../echo.js'
 import TourChat from "@/components/TourChat.jsx";
+import ParticipantsList from "@/components/ParticipantsList.jsx";
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -73,6 +74,7 @@ export default function TourDetail() {
   if (!tourData || !tourData.tour) return <div className="min-h-screen bg-gray-100 p-6">Тур не найден</div>;
 
   const imageUrl = tourData.tour.image_url ? `${baseUrl}${tourData.tour.image_url}` : "/placeholder.svg";
+  const isCreator = user?.id === tourData.creator.id;
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -93,6 +95,8 @@ export default function TourDetail() {
         { isSignedUp && (
           <TourChat tourId={id} user={user} isSignedUp={isSignedUp} />
         )}
+
+        <ParticipantsList tourId={id} isCreator={isCreator} />
 
         <div className="flex items-center gap-4">
           <Avatar className="h-8 w-8">
@@ -215,9 +219,9 @@ export default function TourDetail() {
         <Button
           className="w-full max-w-xs"
           onClick={handleSignUp}
-          disabled={isSignedUp}
+          disabled={isSignedUp || tourData.user_status === 2}
         >
-          {isSignedUp ? "Вы записаны" : "Записаться"}
+          {isSignedUp ? "Вы записаны" : tourData.user_status === 2 ? "Запись заблокирована" : "Записаться"}
         </Button>
       </div>
     </div>

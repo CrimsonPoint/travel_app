@@ -94,6 +94,84 @@ class TourController extends Controller
         ]);
     }
 
+    public function getTourParticipants(Request $request, $id)
+    {
+        $tour = Tour::findOrFail($id);
+
+        if (!$tour) {
+            return response()->json(['message' => 'Тур не найден'], 404);
+        }
+
+        if (Auth::id() !== $tour->creator_id) {
+            return response()->json(['message' => 'Доступ запрещён'], 403);
+        }
+
+        $participants = DB::table('tour_user')
+            ->where('tour_id', $id)
+            ->join('users', 'tour_user.user_id', '=', 'users.id')
+            ->select(
+                'tour_user.id',
+                'tour_user.tour_id',
+                'tour_user.user_id',
+                'tour_user.status',
+                'tour_user.created_at',
+                'tour_user.updated_at',
+                'users.name',
+            )->get();
+
+        return $participants;
+    }
+
+    public function acceptParticipant(Request $request, $id)
+    {
+        $tour = Tour::findOrFail($id);
+        if (!$tour) {
+            return response()->json(['message' => 'Тур не найден'], 404);
+        }
+        if (Auth::id() !== $tour->creator_id) {
+            return response()->json(['message' => 'Доступ запрещён'], 403);
+        }
+
+        $participant = DB::table('tour_user')
+            ->where('id', $request->participant_id)
+            ->where('tour_id', $id)
+            ->first();
+        if (!$participant) {
+            return response()->json(['message' => 'Недействительный участник'], 400);
+        }
+
+        DB::table('tour_user')
+            ->where('id', $request->participant_id)
+            ->update(['status' => Tour::APPROVED_STATUS]);
+
+        return response()->json(['message' => 'Пользователь принят']);
+    }
+
+    public function blockParticipant(Request $request, $id)
+    {
+        $tour = Tour::findOrFail($id);
+        if (!$tour) {
+            return response()->json(['message' => 'Тур не найден'], 404);
+        }
+        if (Auth::id() !== $tour->creator_id) {
+            return response()->json(['message' => 'Доступ запрещён'], 403);
+        }
+
+        $participant = DB::table('tour_user')
+            ->where('id', $request->participant_id)
+            ->where('tour_id', $id)
+            ->first();
+        if (!$participant) {
+            return response()->json(['message' => 'Недействительный участник'], 400);
+        }
+
+        DB::table('tour_user')
+            ->where('id', $request->participant_id)
+            ->update(['status' => Tour::USER_BLOCKED_STATUS]);
+
+        return response()->json(['message' => 'Пользователь заблокирован']);
+    }
+
 
     public function getTour(Request $request, $id)
     {

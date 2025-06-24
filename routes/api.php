@@ -52,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::post('/tours', [TourController::class, 'store'])->name('api.tours.store');
     Route::post('/tour/create', [TourController::class, 'create'])->name('api.tours.create');
     Route::get('/tour/{id}', [TourController::class, 'getTour'])->name('api.tours.get_tour');
+    Route::get('/tours/{tourId}/participants', [TourController::class, 'getTourParticipants'])->name('api.tours.get_tour_participants');
+    Route::post('/tours/{id}/accept', [TourController::class, 'acceptParticipant'])->name('api.tours.accept');
+    Route::post('/tours/{id}/block', [TourController::class, 'blockParticipant'])->name('api.tours.block');
     Route::delete('/tour/{id}', [TourController::class, 'delete'])->name('api.tours.delete_tour');
     Route::put('/tour/{id}', [TourController::class, 'put'])->name('api.tours.put_tour');
     Route::post('/tours/{id}/signup', [TourController::class, 'signUp'])->name('api.tours.signup');

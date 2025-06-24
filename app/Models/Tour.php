@@ -15,6 +15,10 @@ class Tour extends Model
     const APPROVED_STATUS = 2;
     const COMPLETED_STATUS = 4;
 
+    const USER_AWAITING_STATUS = 0;
+    const USER_APPROVED_STATUS = 1;
+    const USER_BLOCKED_STATUS = 2;
+
     protected $fillable = [
         'title',
         'image_url',
@@ -62,6 +66,7 @@ class Tour extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'tour_user', 'tour_id', 'user_id')
+            ->where('status', '=', self::USER_APPROVED_STATUS)
             ->withTimestamps();
     }
 }

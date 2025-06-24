@@ -162,9 +162,9 @@ export default function UserManagement() {
     setRoleDialogOpen(true);
   };
 
-  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
   if (loading) return <div className="p-6">Загрузка...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
+  if (!canEdit || !user.is_verified) return <ForbiddenPage />;
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
