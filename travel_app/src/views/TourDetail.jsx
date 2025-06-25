@@ -12,7 +12,6 @@ import { Toaster, toast } from "sonner";
 import YandexMap from "../components/YandexMap.jsx";
 import '../echo.js'
 import TourChat from "@/components/TourChat.jsx";
-import ParticipantsList from "@/components/ParticipantsList.jsx";
 
 export default function TourDetail() {
   const { id } = useParams();
@@ -95,8 +94,6 @@ export default function TourDetail() {
         { isSignedUp && (
           <TourChat tourId={id} user={user} isSignedUp={isSignedUp} />
         )}
-
-        <ParticipantsList tourId={id} isCreator={isCreator} />
 
         <div className="flex items-center gap-4">
           <Avatar className="h-8 w-8">

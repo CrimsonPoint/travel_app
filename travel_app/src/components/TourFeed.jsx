@@ -17,7 +17,7 @@ export default function TourFeed() {
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({
     difficulty: "",
-    distance: [0, 100],
+    distance: [0, 1000],
     location: "",
     date_start: "",
   });

@@ -166,8 +166,9 @@ class TourController extends Controller
         }
 
         DB::table('tour_user')
+            ->where('tour_id', $tour->id)
             ->where('id', $request->participant_id)
-            ->update(['status' => Tour::USER_BLOCKED_STATUS]);
+            ->delete();
 
         return response()->json(['message' => 'Пользователь заблокирован']);
     }
@@ -260,7 +261,7 @@ class TourController extends Controller
         $tour = Tour::findOrFail($id);
         $user = Auth::user();
 
-        if ($tour->participants()->where('user_id', $user->id)->exists()) {
+        if (DB::table('tour_user')->where('tour_id', '=', $id)->where('user_id', '=', $user->id)->exists()) {
             return response()->json([
                 'message' => 'Вы уже записаны на этот тур',
             ], 400);

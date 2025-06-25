@@ -66,7 +66,6 @@ class Tour extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'tour_user', 'tour_id', 'user_id')
-            ->where('status', '=', self::USER_APPROVED_STATUS)
             ->withTimestamps();
     }
 }

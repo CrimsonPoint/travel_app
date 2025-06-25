@@ -39,7 +39,6 @@ export default function DefaultLayout() {
         (e) => {
           setNotifications((prev) => [e, ...prev]);
           setUnreadCount((prev) => prev + 1);
-          toast.success(e.message, { duration: 5000 });
         }
       );
 

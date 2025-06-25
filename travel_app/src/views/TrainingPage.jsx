@@ -42,12 +42,14 @@ const TrainingPage = () => {
                     <CardTitle className="text-xl font-semibold text-center">{slide.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center">
-                    <img
-                      src={`${baseUrl}/${slide.image}`}
-                      alt={slide.title}
-                      className="w-full h-64 object-cover rounded-lg mb-4"
-                    />
-                    <p className="text-gray-600 text-center">{slide.description}</p>
+                    { slide.image && (
+                      <img
+                        src={`${baseUrl}/${slide.image}`}
+                        alt={slide.title}
+                        className="w-full h-64 object-cover rounded-lg mb-4"
+                      />
+                    )}
+                    {slide.description && (<p className="text-gray-600 text-center">{slide.description}</p>)}
                   </CardContent>
                 </Card>
               </CarouselItem>
