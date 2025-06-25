@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { flexRender, getCoreRowModel, useReactTable, getSortedRowModel,} from "@tanstack/react-table";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import { flexRender, getCoreRowModel, useReactTable, getSortedRowModel } from "@tanstack/react-table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit, CheckCheck } from "lucide-react";
 import axiosClient from "../axios-client.js";
@@ -22,11 +23,11 @@ export default function ModerateTours() {
   const { user, canEdit } = useStateContext();
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [editTour, setEditTour] = useState(null);
   const [open, setOpen] = useState(false);
   const [tourIdToDelete, setTourIdToDelete] = useState(null);
   const [checklistItem, setChecklistItem] = useState("");
+  const [trainingTopics, setTrainingTopics] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({
     title: true,
     description: true,
@@ -78,7 +79,7 @@ export default function ModerateTours() {
     axiosClient
       .delete(`/tour/${tourIdToDelete}`)
       .then(() => {
-        setTours(tours.filter((tour) => tour.id !== tourIdToDelete));
+        setTours(tours.filter((tour) => tour.tour.id !== tourIdToDelete));
         setOpen(false);
         toast.success("Тур успешно удалён");
       })
@@ -94,6 +95,18 @@ export default function ModerateTours() {
 
   const handleEditDifficultyChange = (value) => {
     setEditTour((prev) => ({ ...prev, difficulty: value }));
+  };
+
+  const handleTopicChange = (topicId) => {
+    setEditTour((prev) => {
+      const topics = prev.extra_fields.topics.includes(topicId)
+        ? prev.extra_fields.topics.filter((id) => id !== topicId)
+        : [...prev.extra_fields.topics, topicId];
+      return {
+        ...prev,
+        extra_fields: { ...prev.extra_fields, topics }
+      };
+    });
   };
 
   const addChecklistItem = () => {
@@ -114,13 +127,16 @@ export default function ModerateTours() {
   };
 
   const handleSaveEdit = () => {
+    const data = {
+      ...editTour,
+      extra_fields: editTour.extra_fields,
+    };
     axiosClient
-      .put(`/tour/${editTour.id}`, editTour)
+      .put(`/tour/${editTour.id}`, data)
       .then(({ data }) => {
-        const updatedTours = tours.map((item) =>
+        setTours(tours.map((item) =>
           item.tour.id === data.id ? { ...item, tour: data } : item
-        );
-        setTours(updatedTours);
+        ));
         setEditTour(null);
         toast.success("Тур успешно обновлён");
       })
@@ -429,6 +445,28 @@ export default function ModerateTours() {
                   />
                 </div>
                 <div>
+                  <Label>Темы обучения</Label>
+                  {editTour.extra_fields.topics}
+                  <div className="mt-2 space-y-2">
+                    {trainingTopics.length > 0 ? (
+                      trainingTopics.map((topic) => (
+                        <div key={topic.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`topic-${topic.id}`}
+                            checked={editTour.extra_fields.topics.includes(topic.id)}
+                            onCheckedChange={() => handleTopicChange(topic.id)}
+                          />
+                          <Label htmlFor={`topic-${topic.id}`} className="cursor-pointer">
+                            {topic.name}
+                          </Label>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-600">Темы обучения не найдены</p>
+                    )}
+                  </div>
+                </div>
+                <div>
                   <Label>Чеклист</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
@@ -466,7 +504,6 @@ export default function ModerateTours() {
           </Dialog>
         )}
       </div>
-      <Toaster />
     </div>
   );
 }

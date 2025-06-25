@@ -192,10 +192,11 @@ class TourController extends Controller
                 'image_url' => $tour->image_url,
                 "route" =>$tour->route,
                 'extra_fields' => $tour->extra_fields,
-                'topics' => $tour->extra_fields ? TrainingTopic::findOrFail($tour->extra_fields['topics']) : [],
+                'topics' => isset($tour->extra_fields['topics']) ? TrainingTopic::findOrFail($tour->extra_fields['topics']) : [],
             ],
             'creator' => [
                 'name' => $tour->creator->name,
+                'id' => $tour->creator->id,
             ],
             'user_is_participant' => in_array(Auth::user()->id, $tour->participants() ->pluck('user_id')->toArray()),
         ];
@@ -215,11 +216,13 @@ class TourController extends Controller
             'checklist' => 'nullable|json',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'route' => 'nullable|json',
+            'extra_fields' => 'nullable|json'
         ]);
 
         $data = $validated;
         $data['creator_id'] = Auth::id();
         $data['checklist'] = $request->checklist ? json_decode($request->checklist, true) : [];
+        $data['extra_fields'] = $request->extra_fields ? json_decode($request->extra_fields, true) : [];
         $data['route'] = $request->route ? json_decode($request->route, true) : [];
 
         if ($request->hasFile('image')) {
@@ -247,6 +250,7 @@ class TourController extends Controller
                 'checklist' => $tour->checklist,
                 'image_url' => $tour->image_url,
                 'route' => $tour->route,
+                'topics' => isset($tour->extra_fields['topics']) ? TrainingTopic::findOrFail($tour->extra_fields['topics']) : [],
             ],
         ], 201);
     }
@@ -262,7 +266,7 @@ class TourController extends Controller
             ], 400);
         }
 
-        if ($tour->extra_fields['topics']) {
+        if ($tour->extra_fields && isset($tour->extra_fields['topics']) && $tour->creator_id != $user->id) {
             $requiredTopicIds = $tour->extra_fields['topics'];
             $requiredCount = count($requiredTopicIds);
 
