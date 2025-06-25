@@ -28,6 +28,8 @@ export default function ModerateTours() {
   const [tourIdToDelete, setTourIdToDelete] = useState(null);
   const [checklistItem, setChecklistItem] = useState("");
   const [trainingTopics, setTrainingTopics] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState({
     title: true,
     description: true,
@@ -61,6 +63,26 @@ export default function ModerateTours() {
   const handleDelete = (id) => {
     setTourIdToDelete(id);
     setOpen(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Файл слишком большой (макс. 5 МБ)");
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(file.type)) {
+        toast.error("Формат файла должен быть JPEG, PNG, JPG или GIF");
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditTour((prev) => ({ ...prev, image_preview: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleApprove = (id) => {
@@ -127,12 +149,27 @@ export default function ModerateTours() {
   };
 
   const handleSaveEdit = () => {
-    const data = {
-      ...editTour,
-      extra_fields: editTour.extra_fields,
-    };
+    const data = new FormData();
+    console.log( editTour.title)
+    data.append('_method', 'PUT');
+    data.append("title", editTour.title);
+    data.append("difficulty", editTour.difficulty);
+    data.append("distance", Number(editTour.distance));
+    data.append("description", editTour.description);
+    data.append("date_start", format(editTour.date_start, "yyyy-MM-dd'T'HH:mm:ss"));
+    data.append("date_end", format(editTour.date_end, "yyyy-MM-dd'T'HH:mm:ss"));
+    data.append("location", editTour.location);
+    data.append("max_participants", Number(editTour.max_participants));
+    data.append("participants", 1);
+    data.append("checklist", JSON.stringify(editTour.checklist));
+    data.append("route", JSON.stringify(editTour.route));
+    data.append("extra_fields", JSON.stringify(editTour.extra_fields || []));
+    if (imageFile) {
+      data.append("image", imageFile);
+    }
+
     axiosClient
-      .put(`/tour/${editTour.id}`, data)
+      .post(`/tour/${editTour.id}`, data)
       .then(({ data }) => {
         setTours(tours.map((item) =>
           item.tour.id === data.id ? { ...item, tour: data } : item
@@ -324,10 +361,16 @@ export default function ModerateTours() {
         </AlertDialog>
 
         {editTour && (
-          <Dialog open={!!editTour} onOpenChange={() => setEditTour(null)}>
+          <Dialog
+            open={!!editTour}
+            onOpenChange={() => {
+              setEditTour(null);
+              setImageFile(null);
+            }}
+          >
             <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Редактировать тур: {editTour.title}</DialogTitle>
+                <DialogTitle>Редактировать тур: {editTour.title || "Без названия"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -335,8 +378,9 @@ export default function ModerateTours() {
                   <Input
                     id="title"
                     name="title"
-                    value={editTour.title}
+                    value={editTour.title || ""}
                     onChange={handleEditChange}
+                    required
                   />
                 </div>
                 <div>
@@ -361,11 +405,12 @@ export default function ModerateTours() {
                 <div>
                   <Label htmlFor="difficulty">Сложность</Label>
                   <Select
-                    value={editTour.difficulty}
+                    value={editTour.difficulty || ""}
                     onValueChange={handleEditDifficultyChange}
+                    required
                   >
                     <SelectTrigger id="difficulty">
-                      <SelectValue />
+                      <SelectValue placeholder="Выберите сложность" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="1">Легкая</SelectItem>
@@ -379,8 +424,11 @@ export default function ModerateTours() {
                   <Input
                     id="distance"
                     name="distance"
-                    value={editTour.distance}
+                    type="number"
+                    value={editTour.distance || ""}
                     onChange={handleEditChange}
+                    required
+                    min="0"
                   />
                 </div>
                 <div>
@@ -389,7 +437,7 @@ export default function ModerateTours() {
                     id="participants"
                     name="participants"
                     type="number"
-                    value={editTour.participants}
+                    value={editTour.participants || ""}
                     onChange={handleEditChange}
                     min="0"
                   />
@@ -411,7 +459,7 @@ export default function ModerateTours() {
                     id="date_start"
                     name="date_start"
                     type="datetime-local"
-                    value={editTour.date_start.slice(0, 16)}
+                    value={editTour.date_start ? editTour.date_start.slice(0, 16) : ""}
                     onChange={handleEditChange}
                   />
                 </div>
@@ -421,7 +469,7 @@ export default function ModerateTours() {
                     id="date_end"
                     name="date_end"
                     type="datetime-local"
-                    value={editTour.date_end.slice(0, 16)}
+                    value={editTour.date_end ? editTour.date_end.slice(0, 16) : ""}
                     onChange={handleEditChange}
                   />
                 </div>
@@ -435,13 +483,20 @@ export default function ModerateTours() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="image_url">URL изображения</Label>
+                  <Label htmlFor="image">Изображение</Label>
+                  {editTour.image_url && (
+                    <img
+                      src={editTour.image_url}
+                      alt="Preview"
+                      className="mt-2 max-w-[200px] h-auto rounded"
+                    />
+                  )}
                   <Input
-                    id="image_url"
-                    name="image_url"
-                    type="url"
-                    value={editTour.image_url || ""}
-                    onChange={handleEditChange}
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-1 h-15"
                   />
                 </div>
                 <div>
@@ -453,7 +508,7 @@ export default function ModerateTours() {
                         <div key={topic.id} className="flex items-center gap-2">
                           <Checkbox
                             id={`topic-${topic.id}`}
-                            checked={editTour.extra_fields.topics.includes(topic.id)}
+                            checked={editTour.extra_fields?.topics?.includes(topic.id) || false}
                             onCheckedChange={() => handleTopicChange(topic.id)}
                           />
                           <Label htmlFor={`topic-${topic.id}`} className="cursor-pointer">
@@ -495,10 +550,18 @@ export default function ModerateTours() {
                 </div>
               </div>
               <div className="mt-6 flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setEditTour(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditTour(null);
+                    setImageFile(null);
+                  }}
+                >
                   Отмена
                 </Button>
-                <Button onClick={handleSaveEdit}>Сохранить</Button>
+                <Button onClick={handleSaveEdit} disabled={isSaving}>
+                  {isSaving ? "Сохранение..." : "Сохранить"}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

@@ -436,21 +436,26 @@ class TourController extends Controller
 
     public function put(Request $request, $id)
     {
-        if (!Auth::user()->is_admin ?? !Auth::user()->is_moderator) return response()->json(['message' => 'Доступ запрещён'], 403);
+        if (!Auth::user()->canEdit()) return response()->json(['message' => 'Доступ запрещён'], 403);
 
         $tour = Tour::findOrFail($id);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'difficulty' => 'required|string|max:2',
-            'distance' => 'required|int',
+            'difficulty' => 'required|in:1,2,3',
+            'distance' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'max_participants' => 'nullable|int',
             'date_start' => 'nullable|string',
             'date_end' => 'nullable|string',
             'location' => 'nullable|string',
-            'checklist' => 'nullable|array',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('tours', 'public');
+            $validated['image_url'] = Storage::url($path);
+        }
 
         $tour->update($validated);
 
