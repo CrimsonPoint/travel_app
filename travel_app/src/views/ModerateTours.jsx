@@ -150,14 +150,14 @@ export default function ModerateTours() {
 
   const handleSaveEdit = () => {
     const data = new FormData();
-    console.log( editTour.title)
+
     data.append('_method', 'PUT');
     data.append("title", editTour.title);
     data.append("difficulty", editTour.difficulty);
     data.append("distance", Number(editTour.distance));
     data.append("description", editTour.description);
-    data.append("date_start", format(editTour.date_start, "yyyy-MM-dd'T'HH:mm:ss"));
-    data.append("date_end", format(editTour.date_end, "yyyy-MM-dd'T'HH:mm:ss"));
+    data.append("date_start", editTour.date_start);
+    data.append("date_end", editTour.date_end);
     data.append("location", editTour.location);
     data.append("max_participants", Number(editTour.max_participants));
     data.append("participants", 1);
@@ -232,13 +232,6 @@ export default function ModerateTours() {
       accessorKey: "location",
       header: "Местоположение",
       cell: ({ row }) => row.original.tour.location,
-    },
-    {
-      accessorKey: "image_url",
-      header: "URL изображения",
-      cell: ({ row }) => (
-        <div className="max-w-[200px] truncate">{row.original.tour.image_url}</div>
-      ),
     },
     {
       accessorKey: "checklist",
