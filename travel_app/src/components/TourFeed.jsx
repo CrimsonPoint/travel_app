@@ -222,37 +222,25 @@ export default function TourFeed() {
                   {filters.difficulty && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       Сложность: {difficultyLabels[filters.difficulty]}
-                      <X
-                        className="h-3 w-3 ml-1 cursor-pointer"
-                        onClick={() => handleFilterChange("difficulty", "")}
-                      />
+                      <span className="w-3 cursor-pointer" onClick={() => handleFilterChange("difficulty", "")}>[X]</span>
                     </Badge>
                   )}
                   {(filters.distance[0] > 0 || filters.distance[1] < 100) && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       Дистанция: {filters.distance[0]}-{filters.distance[1]} км
-                      <X
-                        className="h-3 w-3 ml-1 cursor-pointer"
-                        onClick={() => handleFilterChange("distance", [0, 100])}
-                      />
+                      <span className="w-3 cursor-pointer" onClick={() => handleFilterChange("distance", [0, 1000])}>[X]</span>
                     </Badge>
                   )}
                   {filters.location && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       Локация: {filters.location}
-                      <X
-                        className="h-3 w-3 ml-1 cursor-pointer"
-                        onClick={() => handleFilterChange("location", "")}
-                      />
+                      <span className="w-3 cursor-pointer" onClick={() => handleFilterChange("location", "")}>[X]</span>
                     </Badge>
                   )}
                   {filters.date_start && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       Дата: {formatDate(filters.date_start)}
-                      <X
-                        className="h-3 w-3 ml-1 cursor-pointer"
-                        onClick={() => handleFilterChange("date_start", "")}
-                      />
+                      <span className="w-3 cursor-pointer" onClick={() => handleFilterChange("date_start", "")}>[X]</span>
                     </Badge>
                   )}
                 </div>

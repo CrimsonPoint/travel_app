@@ -196,11 +196,6 @@ export default function ModerateTours() {
       ),
     },
     {
-      accessorKey: "creator",
-      header: "Создатель",
-      cell: ({ row }) => row.original.tour.creator?.name || "Неизвестно",
-    },
-    {
       accessorKey: "difficulty",
       header: "Сложность",
       cell: ({ row }) => row.original.tour.difficulty,
